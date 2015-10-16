@@ -14,8 +14,47 @@ namespace LPAutoCut {
         private static string TIMEFORMAT = "hh\\:mm\\:ss";
         private static string EPPAUSED = "paused";
 
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+        private static int WM_HOTKEY = 0x0312;
+
+        enum KeyModifier {
+            NOMOD = 0x0000,
+            ALT = 0x0001,
+            CTRL = 0x0002,
+            SHIFT = 0x0004,
+            WIN = 0x0008
+        }
+
         public Form1() {
             InitializeComponent();
+
+            RegisterHotKey(this.Handle, 0, (int)KeyModifier.NOMOD, (int)Keys.F9);
+            RegisterHotKey(this.Handle, 1, (int)KeyModifier.NOMOD, (int)Keys.F10);
+            RegisterHotKey(this.Handle, 2, (int)KeyModifier.NOMOD, (int)Keys.F11);
+            RegisterHotKey(this.Handle, 3, (int)KeyModifier.NOMOD, (int)Keys.F12);
+        }
+
+        protected override void WndProc(ref Message m) {
+            base.WndProc(ref m);
+
+            if (m.Msg == WM_HOTKEY) {
+                //Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
+                //KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
+                int id = m.WParam.ToInt32();                                          // The id of the hotkey that was pressed.
+
+                if (id == 0)
+                    Program.startTimer();
+                else if (id == 1)
+                    Program.stopTimer();
+                else if (id == 2)
+                    Program.startEpisode();
+                else if (id == 3)
+                    Program.stopEpisode();
+            }
         }
 
         public void setEpTime(TimeSpan eptime) {
