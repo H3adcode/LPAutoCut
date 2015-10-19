@@ -100,10 +100,7 @@ namespace LPAutoCut {
         class Marker {
             public TimeSpan timestamp { get; set; }
             public MarkerType type { get; set; }
-            public string[] getMarkerAsStringArray(string format) {
-                return new string[] { timestamp.ToString(format), type.ToString() };
-            }
-            public string ToString() {
+            public override string ToString() {
                 return timestamp.ToString(timecodeExportFormat) + ";" + type;
             }
         }
