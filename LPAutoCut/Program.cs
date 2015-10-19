@@ -8,7 +8,7 @@ using System.Text;
 
 namespace LPAutoCut {
     static class Program {
-        static System.Timers.Timer timer;
+        static System.Timers.Timer updateTimer;
         static List<Marker> markers = new List<Marker>();
         static DateTime start, stop;
         static DateTime currentEpisodeStart;
@@ -17,7 +17,7 @@ namespace LPAutoCut {
         static bool isEpisode = false;
         static bool isStarted = false;
         static string timecodeExportFormat = "hh\\:mm\\:ss";
-
+        
         public enum MarkerType { EpStart, EpEnd, Edit, Cut, Mark };
 
         /// <summary>
@@ -25,31 +25,37 @@ namespace LPAutoCut {
         /// </summary>
         [STAThread]
         static void Main() {
+            DateTime defaultTime = DateTime.Now;
+            AlertTime = new TimeSpan(0, 0, 5);
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             form = new Form1();
             Application.Run(form);
         }
 
+        public static bool AlertActive { get; set; }
+        public static TimeSpan AlertTime { get; set; }
+
         public static void StartTimer() {
+            markers.Clear();
             start = DateTime.Now;
-            timer = new System.Timers.Timer(500);
-            timer.Elapsed += new ElapsedEventHandler(OnTimerElapsed);
-            timer.Enabled = true;
-            UpdateTotalTime();
+            updateTimer = new System.Timers.Timer(500);
+            updateTimer.Elapsed += new ElapsedEventHandler(OnUpdateTimerElapsed);
+            updateTimer.Enabled = true;
+
             isStarted = true;
-            form.onStart();
+
+            form.OnStart();
         }
 
         public static void StopTimer() {
-            isStarted = false;
-            form.onStop();
+            form.OnStop();
             stop = DateTime.Now;
-            timer.Enabled = false;
+            updateTimer.Enabled = false;
             if (isEpisode)
                 StopEpisode();
-            UpdateTotalTime();
-            UpdateEpisodeTime();
+            isStarted = false;
 
             SaveTimecodes();
         }
@@ -59,14 +65,17 @@ namespace LPAutoCut {
             SetMarker(MarkerType.EpStart);
             currentEpisodeStart = DateTime.Now;
             isEpisode = true;
+
+            form.OnEpisodeStart();
         }
 
         public static void StopEpisode() {
             if (!isStarted) return;
             SetMarker(MarkerType.EpEnd);
             currentEpisodeEnd = DateTime.Now;
-            form.addEpisodeTime(currentEpisodeStart.Subtract(start), currentEpisodeEnd.Subtract(start));
+            form.AddEpisodeTime(currentEpisodeStart.Subtract(start), currentEpisodeEnd.Subtract(start));
             isEpisode = false;
+            form.OnEpisodeStop();
         }
 
         public static void SetMarker(MarkerType type) {
@@ -74,23 +83,25 @@ namespace LPAutoCut {
             marker.timestamp = DateTime.Now.Subtract(start);
             marker.type = type;
             markers.Add(marker);
-            form.addMarkerInfo(marker.timestamp, type.ToString());
+            form.AddMarkerInfo(marker.timestamp, type.ToString());
         }
 
-        static void OnTimerElapsed(object sender, ElapsedEventArgs e) {
+        static void OnUpdateTimerElapsed(object sender, ElapsedEventArgs e) {
             UpdateTotalTime();
             UpdateEpisodeTime();
+            if (isEpisode && AlertActive && TimeSpan.Compare(DateTime.Now.Subtract(currentEpisodeStart), AlertTime) > 0)
+                form.OnAlertTimeElapsed();
         }
 
         static void UpdateTotalTime() {
-            form.setTotalTime(DateTime.Now.Subtract(start));
+            form.SetTotalTime(DateTime.Now.Subtract(start));
         }
 
         static void UpdateEpisodeTime() {
             if(isEpisode)
-                form.setEpTime(DateTime.Now.Subtract(currentEpisodeStart));
+                form.SetEpTime(DateTime.Now.Subtract(currentEpisodeStart));
             else
-                form.resetEpTime();
+                form.ResetEpTime();
         }
 
         static void SaveTimecodes() {
