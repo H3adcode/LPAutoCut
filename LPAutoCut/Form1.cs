@@ -11,15 +11,15 @@ using System.Windows.Forms;
 namespace LPAutoCut {
     public partial class Form1 : Form {
 
-        private static string TIMEFORMAT = "hh\\:mm\\:ss";
-        private static string EPPAUSED = "paused";
+        static string TIMEFORMAT = "hh\\:mm\\:ss";
+        static string EPPAUSED = "paused";
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
+        static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
         [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+        static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
-        private static int WM_HOTKEY = 0x0312;
+        static int WM_HOTKEY = 0x0312;
 
         enum KeyModifier {
             NOMOD = 0x0000,
@@ -47,13 +47,13 @@ namespace LPAutoCut {
                 int id = m.WParam.ToInt32();                                          // The id of the hotkey that was pressed.
 
                 if (id == 0)
-                    Program.startTimer();
+                    Program.StartTimer();
                 else if (id == 1)
-                    Program.stopTimer();
+                    Program.StopTimer();
                 else if (id == 2)
-                    Program.startEpisode();
+                    Program.StartEpisode();
                 else if (id == 3)
-                    Program.stopEpisode();
+                    Program.StopEpisode();
             }
         }
 
@@ -78,6 +78,10 @@ namespace LPAutoCut {
             lv_eptimes.Items.Add(new ListViewItem(new string[] { start.ToString(TIMEFORMAT), stop.ToString(TIMEFORMAT), start.Subtract(stop).ToString(TIMEFORMAT) }));
         }
 
+        public void addMarkerInfo(TimeSpan timestamp, string info) {
+            lv_marker.Items.Add(new ListViewItem(new String[] { timestamp.ToString(TIMEFORMAT), info }));
+        }
+
         public void setTotalTime(TimeSpan totaltime) {
             if (tb_totaltime.InvokeRequired)
                 tb_totaltime.Invoke((MethodInvoker)delegate() {
@@ -100,19 +104,31 @@ namespace LPAutoCut {
         }
 
         private void bt_start_Click(object sender, EventArgs e) {
-            Program.startTimer();
+            Program.StartTimer();
         }
 
         private void bt_stop_Click(object sender, EventArgs e) {
-            Program.stopTimer();
+            Program.StopTimer();
         }
 
         private void bt_setstart_Click(object sender, EventArgs e) {
-            Program.startEpisode();
+            Program.StartEpisode();
         }
 
         private void bt_setend_Click(object sender, EventArgs e) {
-            Program.stopEpisode();
+            Program.StopEpisode();
+        }
+
+        private void btn_edit_Click(object sender, EventArgs e) {
+            Program.SetMarker(Program.MarkerType.Edit);
+        }
+
+        private void btn_cut_Click(object sender, EventArgs e) {
+            Program.SetMarker(Program.MarkerType.Cut);
+        }
+
+        private void btn_mark_Click(object sender, EventArgs e) {
+            Program.SetMarker(Program.MarkerType.Mark);
         }
     }
 }
