@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 namespace LPAutoCut {
     static class Program {
@@ -166,7 +167,7 @@ namespace LPAutoCut {
 
             Process scriptProc = new Process();
             scriptProc.StartInfo.FileName = @"script.vbs";
-            scriptProc.StartInfo.WorkingDirectory = @"c:\"; //<---very important 
+            scriptProc.StartInfo.WorkingDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName; //<---very important 
             scriptProc.StartInfo.Arguments = string.Join(" ", args);
             scriptProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden; //prevent console window from popping up
             scriptProc.Start();
