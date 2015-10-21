@@ -161,13 +161,13 @@ namespace LPAutoCut {
             return new TimeSpan(hours, minutes, seconds);
         }
 
-        static void CallMarkerExportScript() {
+        static void CallMarkerExportScript(params string[] args) {
             //System.Diagnostics.Process.Start("");
 
             Process scriptProc = new Process();
             scriptProc.StartInfo.FileName = @"script.vbs";
             scriptProc.StartInfo.WorkingDirectory = @"c:\"; //<---very important 
-            scriptProc.StartInfo.Arguments = "fromc#";
+            scriptProc.StartInfo.Arguments = string.Join(" ", args);
             scriptProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden; //prevent console window from popping up
             scriptProc.Start();
             scriptProc.WaitForExit(); // <-- Optional if you want program running until your script exit
@@ -179,6 +179,12 @@ namespace LPAutoCut {
             public MarkerType type { get; set; }
             public override string ToString() {
                 return timestamp.ToString(timecodeExportFormat) + ";" + type;
+            }
+        }
+
+        public static void ExportMarker() {
+            foreach (Marker marker in markers) {
+                CallMarkerExportScript(marker.timestamp.ToString(timecodeExportFormat), marker.type.ToString());
             }
         }
     }

@@ -200,5 +200,9 @@ namespace LPAutoCut {
         private void dtp_alert_ValueChanged(object sender, EventArgs e) {
             Program.SetAlertTime(dtp_alert.Value);
         }
+
+        private void button1_Click(object sender, EventArgs e) {
+            Program.ExportMarker();
+        }
     }
 }

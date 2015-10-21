@@ -50,6 +50,7 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.dtp_alert = new System.Windows.Forms.DateTimePicker();
             this.cb_alert = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -306,6 +307,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.button1);
             this.tabPage2.Controls.Add(this.groupBox4);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
@@ -348,6 +350,16 @@
             this.cb_alert.Text = "Alert at time limit";
             this.cb_alert.UseVisualStyleBackColor = true;
             this.cb_alert.CheckedChanged += new System.EventHandler(this.cb_alert_CheckedChanged);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(9, 90);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(98, 38);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Export";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
@@ -399,6 +411,7 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.DateTimePicker dtp_alert;
         private System.Windows.Forms.CheckBox cb_alert;
+        private System.Windows.Forms.Button button1;
     }
 }
 
