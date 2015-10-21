@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text;
+using System.Diagnostics;
 
 namespace LPAutoCut {
     static class Program {
@@ -158,6 +159,19 @@ namespace LPAutoCut {
             if (!(Int32.TryParse(splits[0], out hours) && Int32.TryParse(splits[1], out minutes) && Int32.TryParse(splits[2], out seconds)))
                 Console.Error.WriteLine("Could not read Alert Time from settings");
             return new TimeSpan(hours, minutes, seconds);
+        }
+
+        static void CallMarkerExportScript() {
+            //System.Diagnostics.Process.Start("");
+
+            Process scriptProc = new Process();
+            scriptProc.StartInfo.FileName = @"script.vbs";
+            scriptProc.StartInfo.WorkingDirectory = @"c:\"; //<---very important 
+            scriptProc.StartInfo.Arguments = "fromc#";
+            scriptProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden; //prevent console window from popping up
+            scriptProc.Start();
+            scriptProc.WaitForExit(); // <-- Optional if you want program running until your script exit
+            scriptProc.Close();
         }
         
         class Marker {

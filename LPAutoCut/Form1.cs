@@ -37,7 +37,7 @@ namespace LPAutoCut {
 
         public Form1() {
             InitializeComponent();
-
+            
             cb_alert.Checked = Program.IsAlertActive();
             
             dtp_alert.Format = DateTimePickerFormat.Time;
