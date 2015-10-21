@@ -38,10 +38,12 @@ namespace LPAutoCut {
         public Form1() {
             InitializeComponent();
 
+            cb_alert.Checked = Program.IsAlertActive();
+            
             dtp_alert.Format = DateTimePickerFormat.Time;
             dtp_alert.ShowUpDown = true;
             DateTime defaultTime = DateTime.Now;
-            dtp_alert.Value = defaultTime.Subtract(new TimeSpan(defaultTime.Hour - Program.AlertTime.Days, defaultTime.Minute - Program.AlertTime.Minutes, defaultTime.Second - Program.AlertTime.Seconds));
+            dtp_alert.Value = defaultTime.Subtract(new TimeSpan(defaultTime.Hour - Program.GetAlertTime().Days, defaultTime.Minute - Program.GetAlertTime().Minutes, defaultTime.Second - Program.GetAlertTime().Seconds));
 
             buttonGroupEnabledOnStart.Add(bt_epstart);
             buttonGroupEnabledOnStart.Add(bt_epend);
@@ -191,12 +193,12 @@ namespace LPAutoCut {
         }
 
         private void cb_alert_CheckedChanged(object sender, EventArgs e) {
-            Program.AlertActive = cb_alert.Checked;
+            Program.SetAlert(cb_alert.Checked);
             dtp_alert.Enabled = cb_alert.Checked;
         }
 
         private void dtp_alert_ValueChanged(object sender, EventArgs e) {
-            Program.AlertTime = new TimeSpan(dtp_alert.Value.Hour, dtp_alert.Value.Minute, dtp_alert.Value.Second);
+            Program.SetAlertTime(dtp_alert.Value);
         }
     }
 }

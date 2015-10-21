@@ -330,7 +330,6 @@
             // dtp_alert
             // 
             this.dtp_alert.AllowDrop = true;
-            this.dtp_alert.Enabled = false;
             this.dtp_alert.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.dtp_alert.Location = new System.Drawing.Point(7, 43);
             this.dtp_alert.Name = "dtp_alert";

@@ -17,6 +17,11 @@ namespace LPAutoCut {
         static bool isEpisode = false;
         static bool isStarted = false;
         static string timecodeExportFormat = "hh\\:mm\\:ss";
+
+        static Dictionary<SettingName, string> settings;
+        static Dictionary<SettingName, string> settingsDefault;
+
+        public enum SettingName { Alert, AlertTime }
         
         public enum MarkerType { EpStart, EpEnd, Edit, Cut, Mark };
 
@@ -25,8 +30,13 @@ namespace LPAutoCut {
         /// </summary>
         [STAThread]
         static void Main() {
-            DateTime defaultTime = DateTime.Now;
-            AlertTime = new TimeSpan(0, 0, 5);
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit); 
+
+            settingsDefault = new Dictionary<SettingName, string>();
+            settingsDefault.Add(SettingName.Alert, "TRUE");
+            settingsDefault.Add(SettingName.AlertTime, "00:00:05");
+
+            loadSettings();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -34,8 +44,9 @@ namespace LPAutoCut {
             Application.Run(form);
         }
 
-        public static bool AlertActive { get; set; }
-        public static TimeSpan AlertTime { get; set; }
+        static void OnProcessExit(object sender, EventArgs e) {
+            saveSettings();
+        }
 
         public static void StartTimer() {
             markers.Clear();
@@ -89,7 +100,7 @@ namespace LPAutoCut {
         static void OnUpdateTimerElapsed(object sender, ElapsedEventArgs e) {
             UpdateTotalTime();
             UpdateEpisodeTime();
-            if (isEpisode && AlertActive && TimeSpan.Compare(DateTime.Now.Subtract(currentEpisodeStart), AlertTime) > 0)
+            if (isEpisode && IsAlertActive() && TimeSpan.Compare(DateTime.Now.Subtract(currentEpisodeStart), GetAlertTime()) > 0)
                 form.OnAlertTimeElapsed();
         }
 
@@ -106,6 +117,47 @@ namespace LPAutoCut {
 
         static void SaveTimecodes() {
             System.IO.File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Marker.txt", markers.Select(i => i.ToString()).ToArray());
+        }
+
+        static void loadSettings() {
+            try {
+                string[] settingsRaw = System.IO.File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Settings.txt");
+                settings = new Dictionary<SettingName, string>();
+                for (int i = 0; i < settingsRaw.Length; i++) {
+                    string[] settingParts = settingsRaw[i].Split('=');
+                    SettingName currentSetting = (SettingName)Enum.Parse(typeof(SettingName), settingParts[0]);
+                    //if(!settings.ContainsKey(currentSetting)
+                    //    settings.Add(currentSetting, "");    
+                    settings[currentSetting] = settingParts[1].ToUpper();
+                }
+            } catch (Exception e) {
+                Console.Error.WriteLine("Could not load settings. Reset to default Settings.");
+                settings = new Dictionary<SettingName, string>(settingsDefault);
+            }
+        }
+
+        public static void SetAlert(bool alert) {
+            settings[SettingName.Alert] = alert.ToString();
+        }
+
+        public static void SetAlertTime(DateTime alertTime) {
+            settings[SettingName.AlertTime] = alertTime.ToString("hh:mm:ss");
+        }
+
+        static void saveSettings() {
+            System.IO.File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Settings.txt", settings.Select(i => i.Key.ToString() + "=" + i.Value).ToArray());
+        }
+
+        public static bool IsAlertActive() {
+            return settings[SettingName.Alert].CompareTo("TRUE") == 0;
+        }
+
+        public static TimeSpan GetAlertTime() {
+            string[] splits = settings[SettingName.AlertTime].Split(':');
+            int hours = 0, minutes = 0, seconds = 0;
+            if (!(Int32.TryParse(splits[0], out hours) && Int32.TryParse(splits[1], out minutes) && Int32.TryParse(splits[2], out seconds)))
+                Console.Error.WriteLine("Could not read Alert Time from settings");
+            return new TimeSpan(hours, minutes, seconds);
         }
         
         class Marker {
