@@ -69,8 +69,6 @@ namespace LPAutoCut {
             if (isEpisode)
                 StopEpisode();
             isStarted = false;
-
-            SaveTimecodes();
         }
 
         public static void StartEpisode() {
@@ -115,10 +113,6 @@ namespace LPAutoCut {
                 form.SetEpTime(DateTime.Now.Subtract(currentEpisodeStart));
             else
                 form.ResetEpTime();
-        }
-
-        static void SaveTimecodes() {
-            System.IO.File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Marker.txt", markers.Select(i => i.ToString()).ToArray());
         }
 
         static void loadSettings() {
@@ -174,18 +168,58 @@ namespace LPAutoCut {
             scriptProc.WaitForExit(); // <-- Optional if you want program running until your script exit
             scriptProc.Close();
         }
+
+        public static void ExportMarker() {
+            foreach (Marker marker in markers) {
+                CallMarkerExportScript(marker.timestamp.ToString(timecodeExportFormat), marker.type.ToString());
+            }      
+        }
+
+        public static void SaveMarkers() {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "txt Files (*.txt)|*.txt|All files (*.*)|*.*";
+            saveFileDialog.FilterIndex = 1;
+            saveFileDialog.RestoreDirectory = true;
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK) {
+                System.IO.File.WriteAllLines(saveFileDialog.FileName, markers.Select(i => i.ToString()).ToArray());
+            }
+        }
+
+        internal static void LoadMarkers() {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "txt Files (*.txt)|*.txt|All files (*.*)|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.RestoreDirectory = true;
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK) {
+                string[] markersRaw = System.IO.File.ReadAllLines(openFileDialog.FileName);
+                markers.Clear();
+                form.resetForm();
+                for (int i = 0; i < markersRaw.Length; i++) {
+                    string[] markerDataRaw = markersRaw[i].Split(' ');
+                    string[] markerTimeRaw = markerDataRaw[0].Split(':');
+                    Marker marker = new Marker();
+                    int hours = 0, minutes = 0, seconds = 0;
+                    MarkerType type;                    
+                    if(!(Int32.TryParse(markerTimeRaw[0], out hours) && Int32.TryParse(markerTimeRaw[1], out minutes) && Int32.TryParse(markerTimeRaw[2], out seconds) && Enum.TryParse(markerDataRaw[1], out type))) {
+                        Console.Error.WriteLine("Faild to load marker from file");
+                        return;
+                    }
+                    marker.timestamp = new TimeSpan(hours, minutes, seconds);
+                    marker.type = type;
+                    markers.Add(marker);
+
+                    form.AddMarkerInfo(marker.timestamp, marker.type.ToString());
+                }
+            }
+        }
         
         class Marker {
             public TimeSpan timestamp { get; set; }
             public MarkerType type { get; set; }
             public override string ToString() {
                 return timestamp.ToString(timecodeExportFormat) + ";" + type;
-            }
-        }
-
-        public static void ExportMarker() {
-            foreach (Marker marker in markers) {
-                CallMarkerExportScript(marker.timestamp.ToString(timecodeExportFormat), marker.type.ToString());
             }
         }
     }

@@ -204,5 +204,20 @@ namespace LPAutoCut {
         private void button1_Click(object sender, EventArgs e) {
             Program.ExportMarker();
         }
+
+        private void bt_save_Click(object sender, EventArgs e) {
+            Program.SaveMarkers();
+        }
+
+        private void bt_load_Click(object sender, EventArgs e) {
+            Program.LoadMarkers();
+        }
+
+        public void resetForm() {
+            tb_episodetime.Clear();
+            tb_episodetime.Clear();
+            lv_eptimes.Items.Clear();
+            lv_marker.Items.Clear();
+        }
     }
 }
