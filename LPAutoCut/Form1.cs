@@ -35,15 +35,11 @@ namespace LPAutoCut {
         
         System.Timers.Timer flashEffectTimer;
 
-        public Form1() {
+        internal Form1() {
             InitializeComponent();
-            
-            cb_alert.Checked = Program.IsAlertActive();
             
             dtp_alert.Format = DateTimePickerFormat.Time;
             dtp_alert.ShowUpDown = true;
-            DateTime defaultTime = DateTime.Now;
-            dtp_alert.Value = defaultTime.Subtract(new TimeSpan(defaultTime.Hour - Program.GetAlertTime().Days, defaultTime.Minute - Program.GetAlertTime().Minutes, defaultTime.Second - Program.GetAlertTime().Seconds));
 
             buttonGroupEnabledOnStart.Add(bt_epstart);
             buttonGroupEnabledOnStart.Add(bt_epend);
@@ -53,8 +49,11 @@ namespace LPAutoCut {
             buttonGroupEnabledOnStart.Add(bt_stop);
 
             buttonGroupDisabledOnStart.Add(bt_start);
+            buttonGroupDisabledOnStart.Add(bt_save);
+            buttonGroupDisabledOnStart.Add(bt_load);
+            buttonGroupDisabledOnStart.Add(bt_export);
             
-            flashEffectTimer = new System.Timers.Timer(250);
+            flashEffectTimer = new System.Timers.Timer(500);
             flashEffectTimer.Elapsed += new ElapsedEventHandler(OnFlashEffectTimerElapsed);
 
             RegisterHotKey(this.Handle, 0, (int)KeyModifier.NOMOD, (int)Keys.F9);
@@ -82,11 +81,11 @@ namespace LPAutoCut {
             }
         }
 
-        public void SetEpTime(TimeSpan eptime) {
+        internal void SetEpTime(TimeSpan eptime) {
             SetEpTimeSafe(eptime.ToString(TIMEFORMAT));
         }
 
-        public void ResetEpTime() {
+        internal void ResetEpTime() {
             SetEpTimeSafe(EPPAUSED);
         }
 
@@ -99,15 +98,15 @@ namespace LPAutoCut {
                 tb_episodetime.Text = text;
         }
 
-        public void AddEpisodeTime(TimeSpan start, TimeSpan stop) {
+        internal void AddEpisodeTime(TimeSpan start, TimeSpan stop) {
             lv_eptimes.Items.Add(new ListViewItem(new string[] { start.ToString(TIMEFORMAT), stop.ToString(TIMEFORMAT), start.Subtract(stop).ToString(TIMEFORMAT) }));
         }
 
-        public void AddMarkerInfo(TimeSpan timestamp, string info) {
+        internal void AddMarkerInfo(TimeSpan timestamp, string info) {
             lv_marker.Items.Add(new ListViewItem(new String[] { timestamp.ToString(TIMEFORMAT), info }));
         }
 
-        public void SetTotalTime(TimeSpan totaltime) {
+        internal void SetTotalTime(TimeSpan totaltime) {
             if (tb_totaltime.InvokeRequired)
                 tb_totaltime.Invoke((MethodInvoker)delegate() {
                     tb_totaltime.Text = totaltime.ToString(TIMEFORMAT);
@@ -116,7 +115,15 @@ namespace LPAutoCut {
                 tb_totaltime.Text = totaltime.ToString(TIMEFORMAT);
         }
 
-        public void OnStart() {
+        internal void SetAlertChecked(bool alertChecked) {
+            cb_alert.Checked = alertChecked;
+        }
+
+        internal void SetAlertTime(DateTime alertTime) {
+            dtp_alert.Value = alertTime;
+        }
+
+        internal void OnStart() {
             lv_eptimes.Items.Clear();
             lv_marker.Items.Clear();
             foreach (Button button in buttonGroupEnabledOnStart)
@@ -125,24 +132,39 @@ namespace LPAutoCut {
                 button.Enabled = false;
         }
 
-        public void OnStop() {
+        internal void OnStop() {
             foreach (Button button in buttonGroupEnabledOnStart)
                 button.Enabled = false;
             foreach (Button button in buttonGroupDisabledOnStart)
                 button.Enabled = true;
         }
 
-        public void OnEpisodeStart() {
+        internal void OnEpisodeStart() {
             // Stub
         }
 
-        public void OnEpisodeStop() {
+        internal void OnEpisodeStop() {
             flashEffectTimer.Enabled = false;
-            tb_episodetime.BackColor = Color.WhiteSmoke;
+            if (tb_episodetime.InvokeRequired) {
+                tb_episodetime.Invoke((MethodInvoker)delegate() {
+                    tb_episodetime.BackColor = Color.White;
+                });
+            } else
+                tb_episodetime.BackColor = Color.White;
         }
 
-        public void OnAlertTimeElapsed() {
+        internal void OnTimeAlertOn() {
             flashEffectTimer.Enabled = true;
+        }
+
+        internal void OnTimeAlertOff() {
+            flashEffectTimer.Enabled = false;
+            if (tb_episodetime.InvokeRequired) {
+                tb_episodetime.Invoke((MethodInvoker)delegate() {
+                    tb_episodetime.BackColor = Color.White;
+                });
+            } else
+                tb_episodetime.BackColor = Color.White;
         }
 
         void OnFlashEffectTimerElapsed(object sender, ElapsedEventArgs e) {
@@ -213,11 +235,19 @@ namespace LPAutoCut {
             Program.LoadMarkers();
         }
 
-        public void resetForm() {
-            tb_episodetime.Clear();
+        internal void resetForm() {
+            tb_totaltime.Clear();
             tb_episodetime.Clear();
             lv_eptimes.Items.Clear();
             lv_marker.Items.Clear();
+        }
+
+        private void bt_setDefault_Click(object sender, EventArgs e) {
+            Program.saveSettings();
+        }
+
+        private void bt_restoreDefault_Click(object sender, EventArgs e) {
+            Program.loadSettings();
         }
     }
 }

@@ -26,7 +26,7 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.dtp_alert = new System.Windows.Forms.DateTimePicker();
             this.cb_alert = new System.Windows.Forms.CheckBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.bt_export = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.bt_edit = new System.Windows.Forms.Button();
             this.bt_cut = new System.Windows.Forms.Button();
@@ -50,6 +50,8 @@
             this.bt_start = new System.Windows.Forms.Button();
             this.bt_save = new System.Windows.Forms.Button();
             this.bt_load = new System.Windows.Forms.Button();
+            this.bt_setDefault = new System.Windows.Forms.Button();
+            this.bt_restoreDefault = new System.Windows.Forms.Button();
             this.groupBox4.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -58,6 +60,8 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.bt_restoreDefault);
+            this.groupBox4.Controls.Add(this.bt_setDefault);
             this.groupBox4.Controls.Add(this.dtp_alert);
             this.groupBox4.Controls.Add(this.cb_alert);
             this.groupBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -71,7 +75,7 @@
             // dtp_alert
             // 
             this.dtp_alert.AllowDrop = true;
-            this.dtp_alert.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.dtp_alert.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.dtp_alert.Location = new System.Drawing.Point(7, 43);
             this.dtp_alert.Name = "dtp_alert";
             this.dtp_alert.Size = new System.Drawing.Size(118, 23);
@@ -90,15 +94,15 @@
             this.cb_alert.UseVisualStyleBackColor = true;
             this.cb_alert.CheckedChanged += new System.EventHandler(this.cb_alert_CheckedChanged);
             // 
-            // button1
+            // bt_export
             // 
-            this.button1.Location = new System.Drawing.Point(494, 101);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 38);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "Export";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.bt_export.Location = new System.Drawing.Point(494, 101);
+            this.bt_export.Name = "bt_export";
+            this.bt_export.Size = new System.Drawing.Size(75, 38);
+            this.bt_export.TabIndex = 1;
+            this.bt_export.Text = "Export";
+            this.bt_export.UseVisualStyleBackColor = true;
+            this.bt_export.Click += new System.EventHandler(this.button1_Click);
             // 
             // groupBox1
             // 
@@ -254,6 +258,7 @@
             this.tb_totaltime.ReadOnly = true;
             this.tb_totaltime.Size = new System.Drawing.Size(129, 38);
             this.tb_totaltime.TabIndex = 0;
+            this.tb_totaltime.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label2
             // 
@@ -298,6 +303,7 @@
             this.tb_episodetime.ReadOnly = true;
             this.tb_episodetime.Size = new System.Drawing.Size(129, 38);
             this.tb_episodetime.TabIndex = 3;
+            this.tb_episodetime.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // bt_stop
             // 
@@ -324,7 +330,6 @@
             // 
             // bt_save
             // 
-            this.bt_save.Enabled = false;
             this.bt_save.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bt_save.Location = new System.Drawing.Point(332, 101);
             this.bt_save.Name = "bt_save";
@@ -345,6 +350,28 @@
             this.bt_load.UseVisualStyleBackColor = true;
             this.bt_load.Click += new System.EventHandler(this.bt_load_Click);
             // 
+            // bt_setDefault
+            // 
+            this.bt_setDefault.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.bt_setDefault.Location = new System.Drawing.Point(130, 16);
+            this.bt_setDefault.Name = "bt_setDefault";
+            this.bt_setDefault.Size = new System.Drawing.Size(114, 23);
+            this.bt_setDefault.TabIndex = 2;
+            this.bt_setDefault.Text = "Set Default";
+            this.bt_setDefault.UseVisualStyleBackColor = true;
+            this.bt_setDefault.Click += new System.EventHandler(this.bt_setDefault_Click);
+            // 
+            // bt_restoreDefault
+            // 
+            this.bt_restoreDefault.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.bt_restoreDefault.Location = new System.Drawing.Point(130, 45);
+            this.bt_restoreDefault.Name = "bt_restoreDefault";
+            this.bt_restoreDefault.Size = new System.Drawing.Size(114, 23);
+            this.bt_restoreDefault.TabIndex = 3;
+            this.bt_restoreDefault.Text = "Restore Default";
+            this.bt_restoreDefault.UseVisualStyleBackColor = true;
+            this.bt_restoreDefault.Click += new System.EventHandler(this.bt_restoreDefault_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -352,7 +379,7 @@
             this.ClientSize = new System.Drawing.Size(586, 343);
             this.Controls.Add(this.bt_load);
             this.Controls.Add(this.bt_save);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.bt_export);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
@@ -374,7 +401,7 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.DateTimePicker dtp_alert;
         private System.Windows.Forms.CheckBox cb_alert;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button bt_export;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button bt_edit;
         private System.Windows.Forms.Button bt_cut;
@@ -398,6 +425,8 @@
         private System.Windows.Forms.Button bt_start;
         private System.Windows.Forms.Button bt_save;
         private System.Windows.Forms.Button bt_load;
+        private System.Windows.Forms.Button bt_restoreDefault;
+        private System.Windows.Forms.Button bt_setDefault;
 
     }
 }

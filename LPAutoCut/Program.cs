@@ -32,28 +32,23 @@ namespace LPAutoCut {
         /// </summary>
         [STAThread]
         static void Main() {
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit); 
-
             settingsDefault = new Dictionary<SettingName, string>();
             settingsDefault.Add(SettingName.Alert, "TRUE");
-            settingsDefault.Add(SettingName.AlertTime, "00:00:05");
-
-            loadSettings();
+            settingsDefault.Add(SettingName.AlertTime, "00:20:00");
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             form = new Form1();
+
+            loadSettings();
+
             Application.Run(form);
         }
-
-        static void OnProcessExit(object sender, EventArgs e) {
-            saveSettings();
-        }
-
-        public static void StartTimer() {
+        
+        internal static void StartTimer() {
             markers.Clear();
             start = DateTime.Now;
-            updateTimer = new System.Timers.Timer(500);
+            updateTimer = new System.Timers.Timer(1000);
             updateTimer.Elapsed += new ElapsedEventHandler(OnUpdateTimerElapsed);
             updateTimer.Enabled = true;
 
@@ -62,7 +57,7 @@ namespace LPAutoCut {
             form.OnStart();
         }
 
-        public static void StopTimer() {
+        internal static void StopTimer() {
             form.OnStop();
             stop = DateTime.Now;
             updateTimer.Enabled = false;
@@ -71,7 +66,7 @@ namespace LPAutoCut {
             isStarted = false;
         }
 
-        public static void StartEpisode() {
+        internal static void StartEpisode() {
             if (!isStarted) return;
             SetMarker(MarkerType.EpStart);
             currentEpisodeStart = DateTime.Now;
@@ -80,7 +75,7 @@ namespace LPAutoCut {
             form.OnEpisodeStart();
         }
 
-        public static void StopEpisode() {
+        internal static void StopEpisode() {
             if (!isStarted) return;
             SetMarker(MarkerType.EpEnd);
             currentEpisodeEnd = DateTime.Now;
@@ -89,7 +84,7 @@ namespace LPAutoCut {
             form.OnEpisodeStop();
         }
 
-        public static void SetMarker(MarkerType type) {
+        internal static void SetMarker(MarkerType type) {
             Marker marker = new Marker();
             marker.timestamp = DateTime.Now.Subtract(start);
             marker.type = type;
@@ -98,26 +93,29 @@ namespace LPAutoCut {
         }
 
         static void OnUpdateTimerElapsed(object sender, ElapsedEventArgs e) {
-            UpdateTotalTime();
-            UpdateEpisodeTime();
-            if (isEpisode && IsAlertActive() && TimeSpan.Compare(DateTime.Now.Subtract(currentEpisodeStart), GetAlertTime()) > 0)
-                form.OnAlertTimeElapsed();
+            DateTime updateTime = DateTime.Now;
+            UpdateTotalTime(updateTime);
+            UpdateEpisodeTime(updateTime);
+            if (isEpisode && IsAlertActive() && TimeSpan.Compare(updateTime.Subtract(currentEpisodeStart), GetAlertTimeSpan()) > 0)
+                form.OnTimeAlertOn();
+            else
+                form.OnTimeAlertOff();
         }
 
-        static void UpdateTotalTime() {
-            form.SetTotalTime(DateTime.Now.Subtract(start));
+        static void UpdateTotalTime(DateTime updateTime) {
+            form.SetTotalTime(updateTime.Subtract(start));
         }
 
-        static void UpdateEpisodeTime() {
+        static void UpdateEpisodeTime(DateTime updateTime) {
             if(isEpisode)
-                form.SetEpTime(DateTime.Now.Subtract(currentEpisodeStart));
+                form.SetEpTime(updateTime.Subtract(currentEpisodeStart));
             else
                 form.ResetEpTime();
         }
 
-        static void loadSettings() {
+        internal static void loadSettings() {
             try {
-                string[] settingsRaw = System.IO.File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Settings.txt");
+                string[] settingsRaw = System.IO.File.ReadAllLines(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Settings.txt");
                 settings = new Dictionary<SettingName, string>();
                 for (int i = 0; i < settingsRaw.Length; i++) {
                     string[] settingParts = settingsRaw[i].Split('=');
@@ -130,30 +128,42 @@ namespace LPAutoCut {
                 Console.Error.WriteLine("Could not load settings. Reset to default Settings.");
                 settings = new Dictionary<SettingName, string>(settingsDefault);
             }
+            form.SetAlertChecked(IsAlertActive());
+            form.SetAlertTime(GetAlertDateTime());
         }
 
-        public static void SetAlert(bool alert) {
-            settings[SettingName.Alert] = alert.ToString();
+        internal static void SetAlert(bool alert) {
+            settings[SettingName.Alert] = alert.ToString().ToUpper();
         }
 
-        public static void SetAlertTime(DateTime alertTime) {
-            settings[SettingName.AlertTime] = alertTime.ToString("hh:mm:ss");
+        internal static void SetAlertTime(DateTime alertTime) {
+            settings[SettingName.AlertTime] = alertTime.ToString("HH\\:mm\\:ss");
         }
 
-        static void saveSettings() {
-            System.IO.File.WriteAllLines(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Settings.txt", settings.Select(i => i.Key.ToString() + "=" + i.Value).ToArray());
+        internal static void saveSettings() {
+            System.IO.File.WriteAllLines(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Settings.txt", settings.Select(i => i.Key.ToString() + "=" + i.Value).ToArray());
         }
 
-        public static bool IsAlertActive() {
+        internal static bool IsAlertActive() {
             return settings[SettingName.Alert].CompareTo("TRUE") == 0;
         }
 
-        public static TimeSpan GetAlertTime() {
+        internal static TimeSpan GetAlertTimeSpan() {
             string[] splits = settings[SettingName.AlertTime].Split(':');
             int hours = 0, minutes = 0, seconds = 0;
             if (!(Int32.TryParse(splits[0], out hours) && Int32.TryParse(splits[1], out minutes) && Int32.TryParse(splits[2], out seconds)))
                 Console.Error.WriteLine("Could not read Alert Time from settings");
             return new TimeSpan(hours, minutes, seconds);
+        }
+
+        private static DateTime GetAlertDateTime() {
+            string[] splits = settings[SettingName.AlertTime].Split(':');
+            int hours = 0, minutes = 0, seconds = 0;
+            if (!(Int32.TryParse(splits[0], out hours) && Int32.TryParse(splits[1], out minutes) && Int32.TryParse(splits[2], out seconds)))
+                Console.Error.WriteLine("Could not read Alert Time from settings");
+            DateTime alertTime = DateTime.Now;
+            alertTime = alertTime.Subtract(new TimeSpan(alertTime.Hour, alertTime.Minute, alertTime.Second));
+            return alertTime.Add(new TimeSpan(hours, minutes, seconds));
         }
 
         static void CallMarkerExportScript(params string[] args) {
@@ -169,13 +179,13 @@ namespace LPAutoCut {
             scriptProc.Close();
         }
 
-        public static void ExportMarker() {
+        internal static void ExportMarker() {
             foreach (Marker marker in markers) {
                 CallMarkerExportScript(marker.timestamp.ToString(timecodeExportFormat), marker.type.ToString());
             }      
         }
 
-        public static void SaveMarkers() {
+        internal static void SaveMarkers() {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "txt Files (*.txt)|*.txt|All files (*.*)|*.*";
             saveFileDialog.FilterIndex = 1;
@@ -196,6 +206,8 @@ namespace LPAutoCut {
                 string[] markersRaw = System.IO.File.ReadAllLines(openFileDialog.FileName);
                 markers.Clear();
                 form.resetForm();
+                TimeSpan tempEpisodeStart = new TimeSpan();
+                TimeSpan tempEpisodeEnd;
                 for (int i = 0; i < markersRaw.Length; i++) {
                     string[] markerDataRaw = markersRaw[i].Split(' ');
                     string[] markerTimeRaw = markerDataRaw[0].Split(':');
@@ -211,6 +223,12 @@ namespace LPAutoCut {
                     markers.Add(marker);
 
                     form.AddMarkerInfo(marker.timestamp, marker.type.ToString());
+                    if (type.Equals(MarkerType.EpStart))
+                        tempEpisodeStart = marker.timestamp;
+                    else if (type.Equals(MarkerType.EpEnd)) {
+                        tempEpisodeEnd = marker.timestamp;
+                        if(tempEpisodeStart != null) form.AddEpisodeTime(tempEpisodeStart, tempEpisodeEnd);
+                    }
                 }
             }
         }
@@ -219,7 +237,7 @@ namespace LPAutoCut {
             public TimeSpan timestamp { get; set; }
             public MarkerType type { get; set; }
             public override string ToString() {
-                return timestamp.ToString(timecodeExportFormat) + ";" + type;
+                return timestamp.ToString(timecodeExportFormat) + " " + type;
             }
         }
     }
