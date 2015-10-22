@@ -60,6 +60,7 @@ namespace LPAutoCut {
             RegisterHotKey(this.Handle, 1, (int)KeyModifier.NOMOD, (int)Keys.F10);
             RegisterHotKey(this.Handle, 2, (int)KeyModifier.NOMOD, (int)Keys.F7);
             RegisterHotKey(this.Handle, 3, (int)KeyModifier.NOMOD, (int)Keys.F8);
+
         }
 
         protected override void WndProc(ref Message m) {

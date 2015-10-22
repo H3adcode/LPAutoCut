@@ -20,6 +20,8 @@ namespace LPAutoCut {
         static bool isStarted = false;
         static string timecodeExportFormat = "hh\\:mm\\:ss";
 
+        static string executionPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
         static Dictionary<SettingName, string> settings;
         static Dictionary<SettingName, string> settingsDefault;
 
@@ -115,7 +117,7 @@ namespace LPAutoCut {
 
         internal static void loadSettings() {
             try {
-                string[] settingsRaw = System.IO.File.ReadAllLines(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Settings.txt");
+                string[] settingsRaw = System.IO.File.ReadAllLines(executionPath + "\\Settings.txt");
                 settings = new Dictionary<SettingName, string>();
                 for (int i = 0; i < settingsRaw.Length; i++) {
                     string[] settingParts = settingsRaw[i].Split('=');
@@ -141,7 +143,7 @@ namespace LPAutoCut {
         }
 
         internal static void saveSettings() {
-            System.IO.File.WriteAllLines(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Settings.txt", settings.Select(i => i.Key.ToString() + "=" + i.Value).ToArray());
+            System.IO.File.WriteAllLines(executionPath + "\\Settings.txt", settings.Select(i => i.Key.ToString() + "=" + i.Value).ToArray());
         }
 
         internal static bool IsAlertActive() {
