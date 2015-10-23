@@ -24,6 +24,8 @@
         /// </summary>
         private void InitializeComponent() {
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.bt_restoreDefault = new System.Windows.Forms.Button();
+            this.bt_setDefault = new System.Windows.Forms.Button();
             this.dtp_alert = new System.Windows.Forms.DateTimePicker();
             this.cb_alert = new System.Windows.Forms.CheckBox();
             this.bt_export = new System.Windows.Forms.Button();
@@ -50,8 +52,6 @@
             this.bt_start = new System.Windows.Forms.Button();
             this.bt_save = new System.Windows.Forms.Button();
             this.bt_load = new System.Windows.Forms.Button();
-            this.bt_setDefault = new System.Windows.Forms.Button();
-            this.bt_restoreDefault = new System.Windows.Forms.Button();
             this.groupBox4.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -71,6 +71,28 @@
             this.groupBox4.TabIndex = 0;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Alert";
+            // 
+            // bt_restoreDefault
+            // 
+            this.bt_restoreDefault.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.bt_restoreDefault.Location = new System.Drawing.Point(130, 45);
+            this.bt_restoreDefault.Name = "bt_restoreDefault";
+            this.bt_restoreDefault.Size = new System.Drawing.Size(114, 23);
+            this.bt_restoreDefault.TabIndex = 3;
+            this.bt_restoreDefault.Text = "Restore Default";
+            this.bt_restoreDefault.UseVisualStyleBackColor = true;
+            this.bt_restoreDefault.Click += new System.EventHandler(this.bt_restoreDefault_Click);
+            // 
+            // bt_setDefault
+            // 
+            this.bt_setDefault.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.bt_setDefault.Location = new System.Drawing.Point(130, 16);
+            this.bt_setDefault.Name = "bt_setDefault";
+            this.bt_setDefault.Size = new System.Drawing.Size(114, 23);
+            this.bt_setDefault.TabIndex = 2;
+            this.bt_setDefault.Text = "Save Settings";
+            this.bt_setDefault.UseVisualStyleBackColor = true;
+            this.bt_setDefault.Click += new System.EventHandler(this.bt_setDefault_Click);
             // 
             // dtp_alert
             // 
@@ -349,28 +371,6 @@
             this.bt_load.Text = "Load";
             this.bt_load.UseVisualStyleBackColor = true;
             this.bt_load.Click += new System.EventHandler(this.bt_load_Click);
-            // 
-            // bt_setDefault
-            // 
-            this.bt_setDefault.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bt_setDefault.Location = new System.Drawing.Point(130, 16);
-            this.bt_setDefault.Name = "bt_setDefault";
-            this.bt_setDefault.Size = new System.Drawing.Size(114, 23);
-            this.bt_setDefault.TabIndex = 2;
-            this.bt_setDefault.Text = "Set Default";
-            this.bt_setDefault.UseVisualStyleBackColor = true;
-            this.bt_setDefault.Click += new System.EventHandler(this.bt_setDefault_Click);
-            // 
-            // bt_restoreDefault
-            // 
-            this.bt_restoreDefault.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bt_restoreDefault.Location = new System.Drawing.Point(130, 45);
-            this.bt_restoreDefault.Name = "bt_restoreDefault";
-            this.bt_restoreDefault.Size = new System.Drawing.Size(114, 23);
-            this.bt_restoreDefault.TabIndex = 3;
-            this.bt_restoreDefault.Text = "Restore Default";
-            this.bt_restoreDefault.UseVisualStyleBackColor = true;
-            this.bt_restoreDefault.Click += new System.EventHandler(this.bt_restoreDefault_Click);
             // 
             // Form1
             // 

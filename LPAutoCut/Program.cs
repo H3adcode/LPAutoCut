@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using System.Text;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Configuration;
 
 namespace LPAutoCut {
     static class Program {
@@ -19,13 +21,9 @@ namespace LPAutoCut {
         static bool isEpisode = false;
         static bool isStarted = false;
         static string timecodeExportFormat = "hh\\:mm\\:ss";
+        static string tmpVBScriptFile;
 
         static string executionPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-
-        static Dictionary<SettingName, string> settings;
-        static Dictionary<SettingName, string> settingsDefault;
-
-        public enum SettingName { Alert, AlertTime }
         
         public enum MarkerType { EpStart, EpEnd, Edit, Cut, Mark };
 
@@ -34,9 +32,7 @@ namespace LPAutoCut {
         /// </summary>
         [STAThread]
         static void Main() {
-            settingsDefault = new Dictionary<SettingName, string>();
-            settingsDefault.Add(SettingName.Alert, "TRUE");
-            settingsDefault.Add(SettingName.AlertTime, "00:20:00");
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit); 
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -45,6 +41,11 @@ namespace LPAutoCut {
             loadSettings();
 
             Application.Run(form);
+        }
+
+        static void OnProcessExit (object sender, EventArgs e) {
+            if (tmpVBScriptFile != null && File.Exists(tmpVBScriptFile))
+                File.Delete(tmpVBScriptFile);
         }
         
         internal static void StartTimer() {
@@ -98,7 +99,7 @@ namespace LPAutoCut {
             DateTime updateTime = DateTime.Now;
             UpdateTotalTime(updateTime);
             UpdateEpisodeTime(updateTime);
-            if (isEpisode && IsAlertActive() && TimeSpan.Compare(updateTime.Subtract(currentEpisodeStart), GetAlertTimeSpan()) > 0)
+            if (isEpisode && Properties.Settings.Default.AlertChecked && TimeSpan.Compare(updateTime.Subtract(currentEpisodeStart), Properties.Settings.Default.AlertTime) > 0)
                 form.OnTimeAlertOn();
             else
                 form.OnTimeAlertOff();
@@ -115,65 +116,43 @@ namespace LPAutoCut {
                 form.ResetEpTime();
         }
 
+        internal static void resetSettings() {
+            Properties.Settings.Default.Reset();
+            loadSettings();
+        }
+
         internal static void loadSettings() {
-            try {
-                string[] settingsRaw = System.IO.File.ReadAllLines(executionPath + "\\Settings.txt");
-                settings = new Dictionary<SettingName, string>();
-                for (int i = 0; i < settingsRaw.Length; i++) {
-                    string[] settingParts = settingsRaw[i].Split('=');
-                    SettingName currentSetting = (SettingName)Enum.Parse(typeof(SettingName), settingParts[0]);
-                    //if(!settings.ContainsKey(currentSetting)
-                    //    settings.Add(currentSetting, "");    
-                    settings[currentSetting] = settingParts[1].ToUpper();
-                }
-            } catch (Exception e) {
-                Console.Error.WriteLine("Could not load settings. Reset to default Settings.");
-                settings = new Dictionary<SettingName, string>(settingsDefault);
-            }
-            form.SetAlertChecked(IsAlertActive());
-            form.SetAlertTime(GetAlertDateTime());
+            form.SetAlertChecked(Properties.Settings.Default.AlertChecked);
+            form.SetAlertTime(Properties.Settings.Default.AlertTime);
         }
 
         internal static void SetAlert(bool alert) {
-            settings[SettingName.Alert] = alert.ToString().ToUpper();
+            Properties.Settings.Default.AlertChecked = alert;
         }
 
-        internal static void SetAlertTime(DateTime alertTime) {
-            settings[SettingName.AlertTime] = alertTime.ToString("HH\\:mm\\:ss");
+        internal static void SetAlertTime(TimeSpan alertTime) {
+            Properties.Settings.Default.AlertTime = alertTime;
         }
 
         internal static void saveSettings() {
-            System.IO.File.WriteAllLines(executionPath + "\\Settings.txt", settings.Select(i => i.Key.ToString() + "=" + i.Value).ToArray());
-        }
-
-        internal static bool IsAlertActive() {
-            return settings[SettingName.Alert].CompareTo("TRUE") == 0;
-        }
-
-        internal static TimeSpan GetAlertTimeSpan() {
-            string[] splits = settings[SettingName.AlertTime].Split(':');
-            int hours = 0, minutes = 0, seconds = 0;
-            if (!(Int32.TryParse(splits[0], out hours) && Int32.TryParse(splits[1], out minutes) && Int32.TryParse(splits[2], out seconds)))
-                Console.Error.WriteLine("Could not read Alert Time from settings");
-            return new TimeSpan(hours, minutes, seconds);
-        }
-
-        private static DateTime GetAlertDateTime() {
-            string[] splits = settings[SettingName.AlertTime].Split(':');
-            int hours = 0, minutes = 0, seconds = 0;
-            if (!(Int32.TryParse(splits[0], out hours) && Int32.TryParse(splits[1], out minutes) && Int32.TryParse(splits[2], out seconds)))
-                Console.Error.WriteLine("Could not read Alert Time from settings");
-            DateTime alertTime = DateTime.Now;
-            alertTime = alertTime.Subtract(new TimeSpan(alertTime.Hour, alertTime.Minute, alertTime.Second));
-            return alertTime.Add(new TimeSpan(hours, minutes, seconds));
+            Properties.Settings.Default.Save();
         }
 
         static void CallMarkerExportScript(params string[] args) {
-            //System.Diagnostics.Process.Start("");
+            if (tmpVBScriptFile == null || !File.Exists(tmpVBScriptFile)) {
+                string tmpFile = Path.GetTempFileName();
+                tmpVBScriptFile = string.Concat(tmpFile, ".vbs");
+                using (Stream resFileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LPAutoCut.script.vbs")) {
+                    using (Stream tmpFileStream = File.Create(tmpVBScriptFile)) {
+                        File.Delete(tmpFile);
+                        resFileStream.CopyTo(tmpFileStream);
+                    }
+                }
+            }
 
             Process scriptProc = new Process();
-            scriptProc.StartInfo.FileName = @"script.vbs";
-            scriptProc.StartInfo.WorkingDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName; //<---very important 
+            scriptProc.StartInfo.FileName = Path.GetFileName(tmpVBScriptFile);
+            scriptProc.StartInfo.WorkingDirectory = Path.GetDirectoryName(tmpVBScriptFile); //<---very important 
             scriptProc.StartInfo.Arguments = string.Join(" ", args);
             scriptProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden; //prevent console window from popping up
             scriptProc.Start();

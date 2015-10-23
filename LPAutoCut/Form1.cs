@@ -56,10 +56,10 @@ namespace LPAutoCut {
             flashEffectTimer = new System.Timers.Timer(500);
             flashEffectTimer.Elapsed += new ElapsedEventHandler(OnFlashEffectTimerElapsed);
 
-            RegisterHotKey(this.Handle, 0, (int)KeyModifier.NOMOD, (int)Keys.F9);
-            RegisterHotKey(this.Handle, 1, (int)KeyModifier.NOMOD, (int)Keys.F10);
-            RegisterHotKey(this.Handle, 2, (int)KeyModifier.NOMOD, (int)Keys.F7);
-            RegisterHotKey(this.Handle, 3, (int)KeyModifier.NOMOD, (int)Keys.F8);
+            //RegisterHotKey(this.Handle, 0, (int)KeyModifier.NOMOD, (int)Keys.F9);
+            //RegisterHotKey(this.Handle, 1, (int)KeyModifier.NOMOD, (int)Keys.F10);
+            //RegisterHotKey(this.Handle, 2, (int)KeyModifier.NOMOD, (int)Keys.F7);
+            //RegisterHotKey(this.Handle, 3, (int)KeyModifier.NOMOD, (int)Keys.F8);
 
         }
 
@@ -118,10 +118,11 @@ namespace LPAutoCut {
 
         internal void SetAlertChecked(bool alertChecked) {
             cb_alert.Checked = alertChecked;
+            dtp_alert.Enabled = alertChecked;
         }
 
-        internal void SetAlertTime(DateTime alertTime) {
-            dtp_alert.Value = alertTime;
+        internal void SetAlertTime(TimeSpan alertTime) {
+            dtp_alert.Value = DateTime.Today.Add(alertTime);
         }
 
         internal void OnStart() {
@@ -221,7 +222,7 @@ namespace LPAutoCut {
         }
 
         private void dtp_alert_ValueChanged(object sender, EventArgs e) {
-            Program.SetAlertTime(dtp_alert.Value);
+            Program.SetAlertTime(dtp_alert.Value.Subtract(DateTime.Today));
         }
 
         private void button1_Click(object sender, EventArgs e) {
@@ -248,7 +249,7 @@ namespace LPAutoCut {
         }
 
         private void bt_restoreDefault_Click(object sender, EventArgs e) {
-            Program.loadSettings();
+            Program.resetSettings();
         }
     }
 }
