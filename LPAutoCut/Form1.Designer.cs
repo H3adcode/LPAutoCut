@@ -124,7 +124,7 @@
             this.bt_export.TabIndex = 1;
             this.bt_export.Text = "Export";
             this.bt_export.UseVisualStyleBackColor = true;
-            this.bt_export.Click += new System.EventHandler(this.button1_Click);
+            this.bt_export.Click += new System.EventHandler(this.bt_export_Click);
             // 
             // groupBox1
             // 
@@ -385,7 +385,7 @@
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "LPAutoCut";
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox1.ResumeLayout(false);

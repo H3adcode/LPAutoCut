@@ -37,7 +37,7 @@ namespace LPAutoCut {
 
         internal Form1() {
             InitializeComponent();
-            
+                        
             dtp_alert.Format = DateTimePickerFormat.Time;
             dtp_alert.ShowUpDown = true;
 
@@ -56,11 +56,13 @@ namespace LPAutoCut {
             flashEffectTimer = new System.Timers.Timer(500);
             flashEffectTimer.Elapsed += new ElapsedEventHandler(OnFlashEffectTimerElapsed);
 
-            //RegisterHotKey(this.Handle, 0, (int)KeyModifier.NOMOD, (int)Keys.F9);
-            //RegisterHotKey(this.Handle, 1, (int)KeyModifier.NOMOD, (int)Keys.F10);
-            //RegisterHotKey(this.Handle, 2, (int)KeyModifier.NOMOD, (int)Keys.F7);
-            //RegisterHotKey(this.Handle, 3, (int)KeyModifier.NOMOD, (int)Keys.F8);
-
+            RegisterHotKey(this.Handle, 0, (int)KeyModifier.NOMOD, (int)Keys.F9); // Start Timer
+            RegisterHotKey(this.Handle, 1, (int)KeyModifier.NOMOD, (int)Keys.F10); // Stop Timer
+            RegisterHotKey(this.Handle, 2, (int)KeyModifier.NOMOD, (int)Keys.F7); // Start Episode
+            RegisterHotKey(this.Handle, 3, (int)KeyModifier.NOMOD, (int)Keys.F8); // Stop Episode
+            RegisterHotKey(this.Handle, 4, (int)KeyModifier.NOMOD, (int)Keys.F2); // Cut Marker
+            RegisterHotKey(this.Handle, 5, (int)KeyModifier.NOMOD, (int)Keys.F3); // Edit Marker
+            RegisterHotKey(this.Handle, 6, (int)KeyModifier.NOMOD, (int)Keys.F4); // Mark Marker
         }
 
         protected override void WndProc(ref Message m) {
@@ -71,14 +73,15 @@ namespace LPAutoCut {
                 //KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
                 int id = m.WParam.ToInt32();                                          // The id of the hotkey that was pressed.
 
-                if (id == 0)
-                    Program.StartTimer();
-                else if (id == 1)
-                    Program.StopTimer();
-                else if (id == 2)
-                    Program.StartEpisode();
-                else if (id == 3)
-                    Program.StopEpisode();
+                switch (id) {
+                    case 0: Program.StartTimer(); break;
+                    case 1: Program.StopTimer(); break;
+                    case 2: Program.StartEpisode(); break;
+                    case 3: Program.StopEpisode(); break;
+                    case 4: Program.SetMarker(Program.MarkerType.Edit); break;
+                    case 5: Program.SetMarker(Program.MarkerType.Cut); break;
+                    case 6: Program.SetMarker(Program.MarkerType.Mark); break;
+                }
             }
         }
 
@@ -225,10 +228,6 @@ namespace LPAutoCut {
             Program.SetAlertTime(dtp_alert.Value.Subtract(DateTime.Today));
         }
 
-        private void button1_Click(object sender, EventArgs e) {
-            Program.ExportMarker();
-        }
-
         private void bt_save_Click(object sender, EventArgs e) {
             Program.SaveMarkers();
         }
@@ -250,6 +249,10 @@ namespace LPAutoCut {
 
         private void bt_restoreDefault_Click(object sender, EventArgs e) {
             Program.resetSettings();
+        }
+
+        private void bt_export_Click(object sender, EventArgs e) {
+            Program.ExportMarker();
         }
     }
 }
