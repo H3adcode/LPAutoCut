@@ -21,7 +21,8 @@ namespace LPAutoCut {
         static bool isEpisode = false;
         static bool isStarted = false;
         static string timecodeExportFormat = "hh\\:mm\\:ss";
-        static string tmpVBScriptFile;
+        static string tmpJSXFile = Path.GetTempPath() + "\\LPAutoCut.temp.jsx";
+        static string tmpMKRFile = Path.GetTempPath() + "\\LPAutoCut.temp.txt";
 
         static string executionPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
         
@@ -44,8 +45,10 @@ namespace LPAutoCut {
         }
 
         static void OnProcessExit (object sender, EventArgs e) {
-            if (tmpVBScriptFile != null && File.Exists(tmpVBScriptFile))
-                File.Delete(tmpVBScriptFile);
+            if (File.Exists(tmpJSXFile))
+                File.Delete(tmpJSXFile);
+            if (File.Exists(tmpMKRFile))
+                File.Delete(tmpMKRFile);
         }
         
         internal static void StartTimer() {
@@ -139,21 +142,16 @@ namespace LPAutoCut {
         }
 
         static void CallMarkerExportScript(params string[] args) {
-            if (tmpVBScriptFile == null || !File.Exists(tmpVBScriptFile)) {
-                string tmpFile = Path.GetTempFileName();
-                tmpVBScriptFile = string.Concat(tmpFile, ".vbs");
-                using (Stream resFileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LPAutoCut.script.vbs")) {
-                    using (Stream tmpFileStream = File.Create(tmpVBScriptFile)) {
-                        File.Delete(tmpFile);
+            if (!File.Exists(tmpJSXFile)) {
+                using (Stream resFileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LPAutoCut.SetMarker.jsx"))
+                    using (Stream tmpFileStream = File.Create(tmpJSXFile))
                         resFileStream.CopyTo(tmpFileStream);
-                    }
-                }
             }
-
+            System.IO.File.WriteAllLines(tmpMKRFile, markers.Select(i => i.ToStringSeconds()).ToArray());
             Process scriptProc = new Process();
-            scriptProc.StartInfo.FileName = Path.GetFileName(tmpVBScriptFile);
-            scriptProc.StartInfo.WorkingDirectory = Path.GetDirectoryName(tmpVBScriptFile); //<---very important 
-            scriptProc.StartInfo.Arguments = string.Join(" ", args);
+            scriptProc.StartInfo.FileName = Path.GetFileName(tmpJSXFile);
+            scriptProc.StartInfo.WorkingDirectory = Path.GetDirectoryName(tmpJSXFile); //<---very important 
+            //scriptProc.StartInfo.Arguments = string.Join(" ", args);
             scriptProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden; //prevent console window from popping up
             scriptProc.Start();
             scriptProc.WaitForExit(); // <-- Optional if you want program running until your script exit
@@ -219,6 +217,9 @@ namespace LPAutoCut {
             public MarkerType type { get; set; }
             public override string ToString() {
                 return timestamp.ToString(timecodeExportFormat) + " " + type;
+            }
+            public string ToStringSeconds()  {
+                return timestamp.TotalSeconds.ToString() + " " + type;
             }
         }
     }
