@@ -12,36 +12,30 @@ using System.Configuration;
 
 namespace LPAutoCut {
     static class Program {
-        static System.Timers.Timer updateTimer;
+        static System.Timers.Timer clockUpdateTimer;
         static List<Marker> markers = new List<Marker>();
-        static DateTime start, stop;
-        static DateTime currentEpisodeStart;
-        static DateTime currentEpisodeEnd;
-        static MainForm form;
+        static DateTime start, currentEpisodeStart, currentEpisodeEnd;
+        static MainForm mainForm;
         static bool isEpisode = false;
         static bool isStarted = false;
-        static string timecodeExportFormat = "hh\\:mm\\:ss";
-        static string tmpJSXFile = Path.GetTempPath() + "\\LPAutoCut.temp.jsx";
-        static string tmpMKRFile = Path.GetTempPath() + "\\LPAutoCut.temp.txt";
+        static string tmpJSXFile = Path.GetTempPath() + "\\" + Properties.Settings.Default.JSXTempFileName;
+        static string tmpMKRFile = Path.GetTempPath() + "\\" + Properties.Settings.Default.MKRTempFileName;
 
         static string executionPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
         
         public enum MarkerType { EpStart, EpEnd, Edit, Cut, Mark };
 
-        /// <summary>
-        /// Der Haupteinstiegspunkt für die Anwendung.
-        /// </summary>
         [STAThread]
         static void Main() {
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit); 
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            form = new MainForm();
+            mainForm = new MainForm();
 
             loadSettings();
 
-            Application.Run(form);
+            Application.Run(mainForm);
         }
 
         static void OnProcessExit (object sender, EventArgs e) {
@@ -54,19 +48,18 @@ namespace LPAutoCut {
         internal static void StartTimer() {
             markers.Clear();
             start = DateTime.Now;
-            updateTimer = new System.Timers.Timer(1000);
-            updateTimer.Elapsed += new ElapsedEventHandler(OnUpdateTimerElapsed);
-            updateTimer.Enabled = true;
+            clockUpdateTimer = new System.Timers.Timer(1000);
+            clockUpdateTimer.Elapsed += new ElapsedEventHandler(OnUpdateTimerElapsed);
+            clockUpdateTimer.Enabled = true;
 
             isStarted = true;
 
-            form.OnStart();
+            mainForm.OnStart();
         }
 
         internal static void StopTimer() {
-            form.OnStop();
-            stop = DateTime.Now;
-            updateTimer.Enabled = false;
+            mainForm.OnStop();
+            clockUpdateTimer.Enabled = false;
             if (isEpisode)
                 StopEpisode();
             isStarted = false;
@@ -78,16 +71,16 @@ namespace LPAutoCut {
             currentEpisodeStart = DateTime.Now;
             isEpisode = true;
 
-            form.OnEpisodeStart();
+            mainForm.OnEpisodeStart();
         }
 
         internal static void StopEpisode() {
             if (!isStarted) return;
             SetMarker(MarkerType.EpEnd);
             currentEpisodeEnd = DateTime.Now;
-            form.AddEpisodeTime(currentEpisodeStart.Subtract(start), currentEpisodeEnd.Subtract(start));
+            mainForm.AddEpisodeTime(currentEpisodeStart.Subtract(start), currentEpisodeEnd.Subtract(start));
             isEpisode = false;
-            form.OnEpisodeStop();
+            mainForm.OnEpisodeStop();
         }
 
         internal static void SetMarker(MarkerType type) {
@@ -95,7 +88,7 @@ namespace LPAutoCut {
             marker.timestamp = DateTime.Now.Subtract(start);
             marker.type = type;
             markers.Add(marker);
-            form.AddMarkerInfo(marker.timestamp, type.ToString());
+            mainForm.AddMarkerInfo(marker.timestamp, type.ToString());
         }
 
         static void OnUpdateTimerElapsed(object sender, ElapsedEventArgs e) {
@@ -103,20 +96,20 @@ namespace LPAutoCut {
             UpdateTotalTime(updateTime);
             UpdateEpisodeTime(updateTime);
             if (isEpisode && Properties.Settings.Default.AlertChecked && TimeSpan.Compare(updateTime.Subtract(currentEpisodeStart), Properties.Settings.Default.AlertTime) > 0)
-                form.OnTimeAlertOn();
+                mainForm.OnTimeAlertOn();
             else
-                form.OnTimeAlertOff();
+                mainForm.OnTimeAlertOff();
         }
 
         static void UpdateTotalTime(DateTime updateTime) {
-            form.SetTotalTime(updateTime.Subtract(start));
+            mainForm.SetTotalTime(updateTime.Subtract(start));
         }
 
         static void UpdateEpisodeTime(DateTime updateTime) {
             if(isEpisode)
-                form.SetEpTime(updateTime.Subtract(currentEpisodeStart));
+                mainForm.SetEpTime(updateTime.Subtract(currentEpisodeStart));
             else
-                form.ResetEpTime();
+                mainForm.ResetEpTime();
         }
 
         internal static void resetSettings() {
@@ -125,8 +118,8 @@ namespace LPAutoCut {
         }
 
         internal static void loadSettings() {
-            form.SetAlertChecked(Properties.Settings.Default.AlertChecked);
-            form.SetAlertTime(Properties.Settings.Default.AlertTime);
+            mainForm.SetAlertChecked(Properties.Settings.Default.AlertChecked);
+            mainForm.SetAlertTime(Properties.Settings.Default.AlertTime);
         }
 
         internal static void SetAlert(bool alert) {
@@ -143,7 +136,7 @@ namespace LPAutoCut {
 
         internal static void ExportMarker() {
             if (!File.Exists(tmpJSXFile)) {
-                using (Stream resFileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LPAutoCut.SetMarker.jsx")) {
+                using (Stream resFileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(Properties.Settings.Default.JSXResFileName)) {
                     using (Stream tmpFileStream = File.Create(tmpJSXFile)) {
                         resFileStream.CopyTo(tmpFileStream);
                     }
@@ -162,7 +155,7 @@ namespace LPAutoCut {
 
         internal static void SaveMarkers() {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "txt Files (*.txt)|*.txt|All files (*.*)|*.*";
+            saveFileDialog.Filter = "Marker Files (*.mkr)|*.mkr|All files (*.*)|*.*";
             saveFileDialog.FilterIndex = 1;
             saveFileDialog.RestoreDirectory = true;
 
@@ -173,14 +166,14 @@ namespace LPAutoCut {
 
         internal static void LoadMarkers() {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "txt Files (*.txt)|*.txt|All files (*.*)|*.*";
+            openFileDialog.Filter = "Marker Files (*.mkr)|*.mkr|All files (*.*)|*.*";
             openFileDialog.FilterIndex = 1;
             openFileDialog.RestoreDirectory = true;
 
             if (openFileDialog.ShowDialog() == DialogResult.OK) {
                 string[] markersRaw = System.IO.File.ReadAllLines(openFileDialog.FileName);
                 markers.Clear();
-                form.resetForm();
+                mainForm.resetForm();
                 TimeSpan tempEpisodeStart = new TimeSpan();
                 TimeSpan tempEpisodeEnd;
                 for (int i = 0; i < markersRaw.Length; i++) {
@@ -197,12 +190,12 @@ namespace LPAutoCut {
                     marker.type = type;
                     markers.Add(marker);
 
-                    form.AddMarkerInfo(marker.timestamp, marker.type.ToString());
+                    mainForm.AddMarkerInfo(marker.timestamp, marker.type.ToString());
                     if (type.Equals(MarkerType.EpStart))
                         tempEpisodeStart = marker.timestamp;
                     else if (type.Equals(MarkerType.EpEnd)) {
                         tempEpisodeEnd = marker.timestamp;
-                        if(tempEpisodeStart != null) form.AddEpisodeTime(tempEpisodeStart, tempEpisodeEnd);
+                        if(tempEpisodeStart != null) mainForm.AddEpisodeTime(tempEpisodeStart, tempEpisodeEnd);
                     }
                 }
             }
@@ -212,7 +205,7 @@ namespace LPAutoCut {
             public TimeSpan timestamp { get; set; }
             public MarkerType type { get; set; }
             public override string ToString() {
-                return timestamp.ToString(timecodeExportFormat) + " " + type;
+                return timestamp.ToString(Properties.Settings.Default.TimeCodeExportFormat) + " " + type;
             }
             public string ToStringSeconds()  {
                 return timestamp.TotalSeconds.ToString() + " " + type;

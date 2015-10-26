@@ -17,7 +17,6 @@ namespace LPAutoCut {
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
-        static string TIMEFORMAT = "hh\\:mm\\:ss";
         static string EPPAUSED = "paused";
 
         static List<Button> buttonGroupEnabledOnStart = new List<Button>();
@@ -86,7 +85,7 @@ namespace LPAutoCut {
         }
 
         internal void SetEpTime(TimeSpan eptime) {
-            SetEpTimeSafe(eptime.ToString(TIMEFORMAT));
+            SetEpTimeSafe(eptime.ToString(Properties.Settings.Default.TimeCodeDisplayFormat));
         }
 
         internal void ResetEpTime() {
@@ -103,20 +102,20 @@ namespace LPAutoCut {
         }
 
         internal void AddEpisodeTime(TimeSpan start, TimeSpan stop) {
-            lv_eptimes.Items.Add(new ListViewItem(new string[] { start.ToString(TIMEFORMAT), stop.ToString(TIMEFORMAT), start.Subtract(stop).ToString(TIMEFORMAT) }));
+            lv_eptimes.Items.Add(new ListViewItem(new string[] { start.ToString(Properties.Settings.Default.TimeCodeDisplayFormat), stop.ToString(Properties.Settings.Default.TimeCodeDisplayFormat), start.Subtract(stop).ToString(Properties.Settings.Default.TimeCodeDisplayFormat) }));
         }
 
         internal void AddMarkerInfo(TimeSpan timestamp, string info) {
-            lv_marker.Items.Add(new ListViewItem(new String[] { timestamp.ToString(TIMEFORMAT), info }));
+            lv_marker.Items.Add(new ListViewItem(new String[] { timestamp.ToString(Properties.Settings.Default.TimeCodeDisplayFormat), info }));
         }
 
         internal void SetTotalTime(TimeSpan totaltime) {
             if (tb_totaltime.InvokeRequired)
                 tb_totaltime.Invoke((MethodInvoker)delegate() {
-                    tb_totaltime.Text = totaltime.ToString(TIMEFORMAT);
+                    tb_totaltime.Text = totaltime.ToString(Properties.Settings.Default.TimeCodeDisplayFormat);
                 });
             else
-                tb_totaltime.Text = totaltime.ToString(TIMEFORMAT);
+                tb_totaltime.Text = totaltime.ToString(Properties.Settings.Default.TimeCodeDisplayFormat);
         }
 
         internal void SetAlertChecked(bool alertChecked) {

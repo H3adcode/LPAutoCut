@@ -46,5 +46,50 @@ namespace LPAutoCut.Properties {
                 this["AlertTime"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("hh\\:mm\\:ss")]
+        public string TimeCodeExportFormat {
+            get {
+                return ((string)(this["TimeCodeExportFormat"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LPAutoCut.temp.jsx")]
+        public string JSXTempFileName {
+            get {
+                return ((string)(this["JSXTempFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LPAutoCut.temp.txt")]
+        public string MKRTempFileName {
+            get {
+                return ((string)(this["MKRTempFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("LPAutoCut.SetMarker.jsx")]
+        public string JSXResFileName {
+            get {
+                return ((string)(this["JSXResFileName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("hh\\:mm\\:ss")]
+        public string TimeCodeDisplayFormat {
+            get {
+                return ((string)(this["TimeCodeDisplayFormat"]));
+            }
+        }
     }
 }
