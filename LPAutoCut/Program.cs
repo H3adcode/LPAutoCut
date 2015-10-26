@@ -17,7 +17,7 @@ namespace LPAutoCut {
         static DateTime start, stop;
         static DateTime currentEpisodeStart;
         static DateTime currentEpisodeEnd;
-        static Form1 form;
+        static MainForm form;
         static bool isEpisode = false;
         static bool isStarted = false;
         static string timecodeExportFormat = "hh\\:mm\\:ss";
@@ -37,7 +37,7 @@ namespace LPAutoCut {
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            form = new Form1();
+            form = new MainForm();
 
             loadSettings();
 
@@ -141,11 +141,13 @@ namespace LPAutoCut {
             Properties.Settings.Default.Save();
         }
 
-        static void CallMarkerExportScript(params string[] args) {
+        internal static void ExportMarker() {
             if (!File.Exists(tmpJSXFile)) {
-                using (Stream resFileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LPAutoCut.SetMarker.jsx"))
-                    using (Stream tmpFileStream = File.Create(tmpJSXFile))
+                using (Stream resFileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LPAutoCut.SetMarker.jsx")) {
+                    using (Stream tmpFileStream = File.Create(tmpJSXFile)) {
                         resFileStream.CopyTo(tmpFileStream);
+                    }
+                }
             }
             System.IO.File.WriteAllLines(tmpMKRFile, markers.Select(i => i.ToStringSeconds()).ToArray());
             Process scriptProc = new Process();
@@ -155,13 +157,7 @@ namespace LPAutoCut {
             scriptProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden; //prevent console window from popping up
             scriptProc.Start();
             scriptProc.WaitForExit(); // <-- Optional if you want program running until your script exit
-            scriptProc.Close();
-        }
-
-        internal static void ExportMarker() {
-            foreach (Marker marker in markers) {
-                CallMarkerExportScript(marker.timestamp.ToString(timecodeExportFormat), marker.type.ToString());
-            }      
+            scriptProc.Close();     
         }
 
         internal static void SaveMarkers() {

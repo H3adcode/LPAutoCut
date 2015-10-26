@@ -10,7 +10,7 @@ using System.Timers;
 using System.Windows.Forms;
 
 namespace LPAutoCut {
-    public partial class Form1 : Form {
+    public partial class MainForm : Form {
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
@@ -35,7 +35,7 @@ namespace LPAutoCut {
         
         System.Timers.Timer flashEffectTimer;
 
-        internal Form1() {
+        internal MainForm() {
             InitializeComponent();
                         
             dtp_alert.Format = DateTimePickerFormat.Time;
@@ -191,6 +191,13 @@ namespace LPAutoCut {
             flashEffectActive = !flashEffectActive;
         }
 
+        internal void resetForm() {
+            tb_totaltime.Clear();
+            tb_episodetime.Clear();
+            lv_eptimes.Items.Clear();
+            lv_marker.Items.Clear();
+        }
+
         private void bt_start_Click(object sender, EventArgs e) {
             Program.StartTimer();
         }
@@ -234,13 +241,6 @@ namespace LPAutoCut {
 
         private void bt_load_Click(object sender, EventArgs e) {
             Program.LoadMarkers();
-        }
-
-        internal void resetForm() {
-            tb_totaltime.Clear();
-            tb_episodetime.Clear();
-            lv_eptimes.Items.Clear();
-            lv_marker.Items.Clear();
         }
 
         private void bt_setDefault_Click(object sender, EventArgs e) {
