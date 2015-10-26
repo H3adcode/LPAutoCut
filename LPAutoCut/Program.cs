@@ -20,7 +20,6 @@ namespace LPAutoCut {
         static bool isStarted = false;
         static string tmpJSXFile = Path.GetTempPath() + "\\" + Properties.Settings.Default.JSXTempFileName;
         static string tmpMKRFile = Path.GetTempPath() + "\\" + Properties.Settings.Default.MKRTempFileName;
-
         static string executionPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
         
         public enum MarkerType { EpStart, EpEnd, Edit, Cut, Mark };
@@ -38,6 +37,7 @@ namespace LPAutoCut {
             Application.Run(mainForm);
         }
 
+        // clear temp files on close
         static void OnProcessExit (object sender, EventArgs e) {
             if (File.Exists(tmpJSXFile))
                 File.Delete(tmpJSXFile);
@@ -45,41 +45,46 @@ namespace LPAutoCut {
                 File.Delete(tmpMKRFile);
         }
         
+
         internal static void StartTimer() {
+            // clear form
             markers.Clear();
+            // init timer
             start = DateTime.Now;
             clockUpdateTimer = new System.Timers.Timer(1000);
             clockUpdateTimer.Elapsed += new ElapsedEventHandler(OnUpdateTimerElapsed);
             clockUpdateTimer.Enabled = true;
-
             isStarted = true;
-
+            // update form
             mainForm.OnStart();
         }
 
         internal static void StopTimer() {
+            // update form
             mainForm.OnStop();
+            // stop timer
             clockUpdateTimer.Enabled = false;
-            if (isEpisode)
+            if (isEpisode) // if episode running stop episode
                 StopEpisode();
             isStarted = false;
         }
 
         internal static void StartEpisode() {
-            if (!isStarted) return;
-            SetMarker(MarkerType.EpStart);
+            if (!isStarted) return; // if not started break
             currentEpisodeStart = DateTime.Now;
+            SetMarker(MarkerType.EpStart);
             isEpisode = true;
-
+            // update form
             mainForm.OnEpisodeStart();
         }
 
         internal static void StopEpisode() {
-            if (!isStarted) return;
-            SetMarker(MarkerType.EpEnd);
+            if (!isStarted) return; // if not started break
             currentEpisodeEnd = DateTime.Now;
-            mainForm.AddEpisodeTime(currentEpisodeStart.Subtract(start), currentEpisodeEnd.Subtract(start));
+            SetMarker(MarkerType.EpEnd);
             isEpisode = false;
+            // update form
+            mainForm.AddEpisodeTime(currentEpisodeStart.Subtract(start), currentEpisodeEnd.Subtract(start));
             mainForm.OnEpisodeStop();
         }
 
@@ -91,11 +96,14 @@ namespace LPAutoCut {
             mainForm.AddMarkerInfo(marker.timestamp, type.ToString());
         }
 
+        // updates time displays and alerts
         static void OnUpdateTimerElapsed(object sender, ElapsedEventArgs e) {
             DateTime updateTime = DateTime.Now;
-            UpdateTotalTime(updateTime);
-            UpdateEpisodeTime(updateTime);
-            if (isEpisode && Properties.Settings.Default.AlertChecked && TimeSpan.Compare(updateTime.Subtract(currentEpisodeStart), Properties.Settings.Default.AlertTime) > 0)
+            UpdateTotalTime(updateTime); // total time
+            UpdateEpisodeTime(updateTime); // episode time
+            // if alert is set and alert time elapased update form
+            if (isEpisode && Properties.Settings.Default.AlertChecked 
+                && TimeSpan.Compare(updateTime.Subtract(currentEpisodeStart), Properties.Settings.Default.AlertTime) > 0)
                 mainForm.OnTimeAlertOn();
             else
                 mainForm.OnTimeAlertOff();
@@ -112,6 +120,7 @@ namespace LPAutoCut {
                 mainForm.ResetEpTime();
         }
 
+        // resets settings to application defaults
         internal static void resetSettings() {
             Properties.Settings.Default.Reset();
             loadSettings();
@@ -134,63 +143,70 @@ namespace LPAutoCut {
             Properties.Settings.Default.Save();
         }
 
+        // exports marker to active sequence in Adobe Premiere Pro CC
         internal static void ExportMarker() {
-            if (!File.Exists(tmpJSXFile)) {
+            if (!File.Exists(tmpJSXFile)) { // if jsx script not in temp folder create it
                 using (Stream resFileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(Properties.Settings.Default.JSXResFileName)) {
                     using (Stream tmpFileStream = File.Create(tmpJSXFile)) {
                         resFileStream.CopyTo(tmpFileStream);
                     }
                 }
             }
+            // copy current markers to temp folder
             System.IO.File.WriteAllLines(tmpMKRFile, markers.Select(i => i.ToStringSeconds()).ToArray());
+            // call jsx script which will read marker info on itself
             Process scriptProc = new Process();
             scriptProc.StartInfo.FileName = Path.GetFileName(tmpJSXFile);
-            scriptProc.StartInfo.WorkingDirectory = Path.GetDirectoryName(tmpJSXFile); //<---very important 
+            scriptProc.StartInfo.WorkingDirectory = Path.GetDirectoryName(tmpJSXFile); 
             //scriptProc.StartInfo.Arguments = string.Join(" ", args);
-            scriptProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden; //prevent console window from popping up
+            scriptProc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             scriptProc.Start();
-            scriptProc.WaitForExit(); // <-- Optional if you want program running until your script exit
+            scriptProc.WaitForExit();
             scriptProc.Close();     
         }
 
+        // saves marker to user specified location
         internal static void SaveMarkers() {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Marker Files (*.mkr)|*.mkr|All files (*.*)|*.*";
             saveFileDialog.FilterIndex = 1;
             saveFileDialog.RestoreDirectory = true;
-
             if (saveFileDialog.ShowDialog() == DialogResult.OK) {
                 System.IO.File.WriteAllLines(saveFileDialog.FileName, markers.Select(i => i.ToString()).ToArray());
             }
         }
 
+        // loads marker from user specified location
         internal static void LoadMarkers() {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Marker Files (*.mkr)|*.mkr|All files (*.*)|*.*";
             openFileDialog.FilterIndex = 1;
             openFileDialog.RestoreDirectory = true;
-
             if (openFileDialog.ShowDialog() == DialogResult.OK) {
                 string[] markersRaw = System.IO.File.ReadAllLines(openFileDialog.FileName);
-                markers.Clear();
-                mainForm.resetForm();
+                markers.Clear(); // clear marker list
+                mainForm.resetForm(); // clear form
                 TimeSpan tempEpisodeStart = new TimeSpan();
                 TimeSpan tempEpisodeEnd;
-                for (int i = 0; i < markersRaw.Length; i++) {
-                    string[] markerDataRaw = markersRaw[i].Split(' ');
-                    string[] markerTimeRaw = markerDataRaw[0].Split(':');
-                    Marker marker = new Marker();
+                for (int i = 0; i < markersRaw.Length; i++) { // create a marker form each raw file line
+                    string[] markerDataRaw = markersRaw[i].Split(' '); // split time and info
+                    string[] markerTimeRaw = markerDataRaw[0].Split(':'); // split time codes
                     int hours = 0, minutes = 0, seconds = 0;
                     MarkerType type;                    
-                    if(!(Int32.TryParse(markerTimeRaw[0], out hours) && Int32.TryParse(markerTimeRaw[1], out minutes) && Int32.TryParse(markerTimeRaw[2], out seconds) && Enum.TryParse(markerDataRaw[1], out type))) {
+                    if(!(Int32.TryParse(markerTimeRaw[0], out hours) // try to convert time codes
+                        && Int32.TryParse(markerTimeRaw[1], out minutes) 
+                        && Int32.TryParse(markerTimeRaw[2], out seconds) 
+                        && Enum.TryParse(markerDataRaw[1], out type))) { // try to convert marker type
                         Console.Error.WriteLine("Faild to load marker from file");
-                        return;
+                        return; // break if conversion failed
                     }
+                    Marker marker = new Marker();
                     marker.timestamp = new TimeSpan(hours, minutes, seconds);
                     marker.type = type;
                     markers.Add(marker);
-
+                    // update markers in form
                     mainForm.AddMarkerInfo(marker.timestamp, marker.type.ToString());
+                    // update episode times in form
                     if (type.Equals(MarkerType.EpStart))
                         tempEpisodeStart = marker.timestamp;
                     else if (type.Equals(MarkerType.EpEnd)) {

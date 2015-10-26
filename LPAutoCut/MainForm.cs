@@ -12,18 +12,20 @@ using System.Windows.Forms;
 namespace LPAutoCut {
     public partial class MainForm : Form {
 
+        // system hotkey references
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
-        static string EPPAUSED = "paused";
+        string EPPAUSED = "paused";
 
-        static List<Button> buttonGroupEnabledOnStart = new List<Button>();
-        static List<Button> buttonGroupDisabledOnStart = new List<Button>();
-        static bool flashEffectActive = false;
+        List<Button> buttonGroupEnabledOnStart = new List<Button>(); // enabled if timer started, else disabled
+        List<Button> buttonGroupDisabledOnStart = new List<Button>(); // disabled if timer started, else enabled
+        bool flashEffectActive = false;
 
-        static int WM_HOTKEY = 0x0312;
+        // system hotkey key codes
+        int WM_HOTKEY = 0x0312;
         enum KeyModifier {
             NOMOD = 0x0000,
             ALT = 0x0001,
@@ -32,7 +34,7 @@ namespace LPAutoCut {
             WIN = 0x0008
         }
         
-        System.Timers.Timer flashEffectTimer;
+        System.Timers.Timer flashEffectTimer; // timer for alert flash effect
 
         internal MainForm() {
             InitializeComponent();
