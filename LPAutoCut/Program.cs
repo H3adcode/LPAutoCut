@@ -51,7 +51,7 @@ namespace LPAutoCut {
             markers.Clear();
             // init timer
             start = DateTime.Now;
-            clockUpdateTimer = new System.Timers.Timer(1000);
+            clockUpdateTimer = new System.Timers.Timer(100);
             clockUpdateTimer.Elapsed += new ElapsedEventHandler(OnUpdateTimerElapsed);
             clockUpdateTimer.Enabled = true;
             isStarted = true;
@@ -190,18 +190,19 @@ namespace LPAutoCut {
                 TimeSpan tempEpisodeEnd;
                 for (int i = 0; i < markersRaw.Length; i++) { // create a marker form each raw file line
                     string[] markerDataRaw = markersRaw[i].Split(' '); // split time and info
-                    string[] markerTimeRaw = markerDataRaw[0].Split(':'); // split time codes
-                    int hours = 0, minutes = 0, seconds = 0;
+                    string[] markerTimeRaw = markerDataRaw[0].Split(new char[]{':','.'}); // split time codes
+                    int hours = 0, minutes = 0, seconds = 0, milliseconds = 0;
                     MarkerType type;                    
                     if(!(Int32.TryParse(markerTimeRaw[0], out hours) // try to convert time codes
                         && Int32.TryParse(markerTimeRaw[1], out minutes) 
-                        && Int32.TryParse(markerTimeRaw[2], out seconds) 
+                        && Int32.TryParse(markerTimeRaw[2], out seconds)
+                        && Int32.TryParse(markerTimeRaw[3], out milliseconds)
                         && Enum.TryParse(markerDataRaw[1], out type))) { // try to convert marker type
                         Console.Error.WriteLine("Faild to load marker from file");
                         return; // break if conversion failed
                     }
                     Marker marker = new Marker();
-                    marker.timestamp = new TimeSpan(hours, minutes, seconds);
+                    marker.timestamp = new TimeSpan(0, hours, minutes, seconds, milliseconds * (int)Math.Pow(10.0, (3.0 - markerTimeRaw[3].Length))); // Math.Pow determines the accuracy of given milliseconds
                     marker.type = type;
                     markers.Add(marker);
                     // update markers in form

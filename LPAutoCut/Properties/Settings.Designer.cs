@@ -49,7 +49,7 @@ namespace LPAutoCut.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("hh\\:mm\\:ss")]
+        [global::System.Configuration.DefaultSettingValueAttribute("h\\:mm\\:ss\\.f")]
         public string TimeCodeExportFormat {
             get {
                 return ((string)(this["TimeCodeExportFormat"]));
@@ -85,7 +85,7 @@ namespace LPAutoCut.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("hh\\:mm\\:ss")]
+        [global::System.Configuration.DefaultSettingValueAttribute("h\\:mm\\:ss\\.f")]
         public string TimeCodeDisplayFormat {
             get {
                 return ((string)(this["TimeCodeDisplayFormat"]));
