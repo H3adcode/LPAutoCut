@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -12,6 +13,55 @@ using System.Windows.Forms;
 namespace LPAutoCut {
     public partial class MainForm : Form {
 
+        #region test
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc callback, IntPtr hInstance, uint threadId);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern bool UnhookWindowsHookEx(IntPtr hInstance);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern IntPtr CallNextHookEx(IntPtr idHook, int nCode, int wParam, IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        static extern IntPtr LoadLibrary(string lpFileName);
+
+        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+        const int WH_KEYBOARD_LL = 13;
+        const int WM_KEYDOWN = 0x100;
+
+        private LowLevelKeyboardProc _proc = hookProc;
+
+        private static IntPtr hhook = IntPtr.Zero;
+
+        public void SetHook() {
+            hhook = SetWindowsHookEx(WH_KEYBOARD_LL, _proc, LoadLibrary("User32"), 0);
+        }
+
+        public static void UnHook() {
+            UnhookWindowsHookEx(hhook);
+        }
+
+        public static IntPtr hookProc(int code, IntPtr wParam, IntPtr lParam) {
+            if (code >= 0 && wParam == (IntPtr)WM_KEYDOWN) {
+                switch (Marshal.ReadInt32(lParam)) {
+                    case (int)Keys.F9: Program.StartTimer(); break;
+                    case (int)Keys.F10: Program.StopTimer(); break;
+                    case (int)Keys.F7: Program.StartEpisode(); break;
+                    case (int)Keys.F8: Program.StopEpisode(); break;
+                    case (int)Keys.F2: Program.SetMarker(Program.MarkerType.Edit); break;
+                    case (int)Keys.F3: Program.SetMarker(Program.MarkerType.Cut); break;
+                    case (int)Keys.F4: Program.SetMarker(Program.MarkerType.Mark); break;
+                }
+                return (IntPtr)1;
+            } else
+                return CallNextHookEx(hhook, code, (int)wParam, lParam);
+        }
+
+        #endregion
+
         // system hotkey references
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
@@ -19,9 +69,11 @@ namespace LPAutoCut {
         static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
         string EPPAUSED = "paused";
-
+        
         List<Button> buttonGroupEnabledOnStart = new List<Button>(); // enabled if timer started, else disabled
         List<Button> buttonGroupDisabledOnStart = new List<Button>(); // disabled if timer started, else enabled
+        List<Button> buttonGroupEnabledInEpisode = new List<Button>(); // enabled if episode is started, else disabled
+        List<Button> buttonGroupDisabledInEpisode = new List<Button>(); // disabled if episode is started, else enabled
         bool flashEffectActive = false;
 
         // system hotkey key codes
@@ -43,29 +95,40 @@ namespace LPAutoCut {
             dtp_alert.ShowUpDown = true;
 
             buttonGroupEnabledOnStart.Add(bt_epstart);
-            buttonGroupEnabledOnStart.Add(bt_epend);
             buttonGroupEnabledOnStart.Add(bt_edit);
             buttonGroupEnabledOnStart.Add(bt_cut);
             buttonGroupEnabledOnStart.Add(bt_mark);
             buttonGroupEnabledOnStart.Add(bt_stop);
 
             buttonGroupDisabledOnStart.Add(bt_start);
-            buttonGroupDisabledOnStart.Add(bt_save);
-            buttonGroupDisabledOnStart.Add(bt_load);
-            buttonGroupDisabledOnStart.Add(bt_export);
+            //buttonGroupDisabledOnStart.Add(bt_save);
+            //buttonGroupDisabledOnStart.Add(bt_load);
+            //buttonGroupDisabledOnStart.Add(bt_export);
+
+            buttonGroupEnabledInEpisode.Add(bt_epend);
+
+            buttonGroupDisabledInEpisode.Add(bt_epstart);
             
             flashEffectTimer = new System.Timers.Timer(500);
             flashEffectTimer.Elapsed += new ElapsedEventHandler(OnFlashEffectTimerElapsed);
 
-            RegisterHotKey(this.Handle, 0, (int)KeyModifier.NOMOD, (int)Keys.F9); // Start Timer
-            RegisterHotKey(this.Handle, 1, (int)KeyModifier.NOMOD, (int)Keys.F10); // Stop Timer
-            RegisterHotKey(this.Handle, 2, (int)KeyModifier.NOMOD, (int)Keys.F7); // Start Episode
-            RegisterHotKey(this.Handle, 3, (int)KeyModifier.NOMOD, (int)Keys.F8); // Stop Episode
-            RegisterHotKey(this.Handle, 4, (int)KeyModifier.NOMOD, (int)Keys.F2); // Cut Marker
-            RegisterHotKey(this.Handle, 5, (int)KeyModifier.NOMOD, (int)Keys.F3); // Edit Marker
-            RegisterHotKey(this.Handle, 6, (int)KeyModifier.NOMOD, (int)Keys.F4); // Mark Marker
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit); 
+
+            SetHook();
+
+            //RegisterHotKey(this.Handle, 0, (int)KeyModifier.NOMOD, (int)Keys.F9); // Start Timer
+            //RegisterHotKey(this.Handle, 1, (int)KeyModifier.NOMOD, (int)Keys.F10); // Stop Timer
+            //RegisterHotKey(this.Handle, 2, (int)KeyModifier.NOMOD, (int)Keys.F7); // Start Episode
+            //RegisterHotKey(this.Handle, 3, (int)KeyModifier.NOMOD, (int)Keys.F8); // Stop Episode
+            //RegisterHotKey(this.Handle, 4, (int)KeyModifier.NOMOD, (int)Keys.F2); // Cut Marker
+            //RegisterHotKey(this.Handle, 5, (int)KeyModifier.NOMOD, (int)Keys.F3); // Edit Marker
+            //RegisterHotKey(this.Handle, 6, (int)KeyModifier.NOMOD, (int)Keys.F4); // Mark Marker
         }
 
+        static void OnProcessExit(object sender, EventArgs e) {
+            UnHook();
+        }
+        
         protected override void WndProc(ref Message m) {
             base.WndProc(ref m);
 
@@ -146,7 +209,10 @@ namespace LPAutoCut {
         }
 
         internal void OnEpisodeStart() {
-            // Stub
+            foreach (Button button in buttonGroupEnabledInEpisode)
+                button.Enabled = true;
+            foreach (Button button in buttonGroupDisabledInEpisode)
+                button.Enabled = false;
         }
 
         internal void OnEpisodeStop() {
@@ -157,6 +223,12 @@ namespace LPAutoCut {
                 });
             } else
                 tb_episodetime.BackColor = Color.White;
+
+
+            foreach (Button button in buttonGroupEnabledInEpisode)
+                button.Enabled = false;
+            foreach (Button button in buttonGroupDisabledInEpisode)
+                button.Enabled = true;
         }
 
         internal void OnTimeAlertOn() {
