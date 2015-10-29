@@ -56,8 +56,8 @@ namespace LPAutoCut {
             
             flashEffectTimer = new System.Timers.Timer(500);
             flashEffectTimer.Elapsed += new ElapsedEventHandler(OnFlashEffectTimerElapsed);
-
-            RegisterHotKey(this.Handle, 0, (int)KeyModifier.NOMOD, (int)Keys.F9); // Start Timer
+            
+            RegisterHotKey(IntPtr.Zero, 0, (int)KeyModifier.NOMOD, (int)Keys.F9); // Start Timer
             RegisterHotKey(this.Handle, 1, (int)KeyModifier.NOMOD, (int)Keys.F10); // Stop Timer
             RegisterHotKey(this.Handle, 2, (int)KeyModifier.NOMOD, (int)Keys.F7); // Start Episode
             RegisterHotKey(this.Handle, 3, (int)KeyModifier.NOMOD, (int)Keys.F8); // Stop Episode
@@ -67,8 +67,6 @@ namespace LPAutoCut {
         }
 
         protected override void WndProc(ref Message m) {
-            base.WndProc(ref m);
-
             if (m.Msg == WM_HOTKEY) {
                 //Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
                 //KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
@@ -84,6 +82,7 @@ namespace LPAutoCut {
                     case 6: Program.SetMarker(Program.MarkerType.Mark); break;
                 }
             }
+            base.WndProc(ref m);
         }
 
         internal void SetEpTime(TimeSpan eptime) {
