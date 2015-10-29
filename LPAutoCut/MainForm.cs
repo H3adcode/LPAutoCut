@@ -17,13 +17,10 @@ namespace LPAutoCut {
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc callback, IntPtr hInstance, uint threadId);
-
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern bool UnhookWindowsHookEx(IntPtr hInstance);
-
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern IntPtr CallNextHookEx(IntPtr idHook, int nCode, int wParam, IntPtr lParam);
-
         [System.Runtime.InteropServices.DllImport("kernel32.dll")]
         static extern IntPtr LoadLibrary(string lpFileName);
 
@@ -63,10 +60,10 @@ namespace LPAutoCut {
         #endregion
 
         // system hotkey references
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+        //[System.Runtime.InteropServices.DllImport("user32.dll")]
+        //static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
+        //[System.Runtime.InteropServices.DllImport("user32.dll")]
+        //static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
         string EPPAUSED = "paused";
         
@@ -129,25 +126,25 @@ namespace LPAutoCut {
             UnHook();
         }
         
-        protected override void WndProc(ref Message m) {
-            base.WndProc(ref m);
+        //protected override void WndProc(ref Message m) {
+        //    base.WndProc(ref m);
 
-            if (m.Msg == WM_HOTKEY) {
-                //Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
-                //KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
-                int id = m.WParam.ToInt32();                                          // The id of the hotkey that was pressed.
+        //    if (m.Msg == WM_HOTKEY) {
+        //        //Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
+        //        //KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
+        //        int id = m.WParam.ToInt32();                                          // The id of the hotkey that was pressed.
 
-                switch (id) {
-                    case 0: Program.StartTimer(); break;
-                    case 1: Program.StopTimer(); break;
-                    case 2: Program.StartEpisode(); break;
-                    case 3: Program.StopEpisode(); break;
-                    case 4: Program.SetMarker(Program.MarkerType.Edit); break;
-                    case 5: Program.SetMarker(Program.MarkerType.Cut); break;
-                    case 6: Program.SetMarker(Program.MarkerType.Mark); break;
-                }
-            }
-        }
+        //        switch (id) {
+        //            case 0: Program.StartTimer(); break;
+        //            case 1: Program.StopTimer(); break;
+        //            case 2: Program.StartEpisode(); break;
+        //            case 3: Program.StopEpisode(); break;
+        //            case 4: Program.SetMarker(Program.MarkerType.Edit); break;
+        //            case 5: Program.SetMarker(Program.MarkerType.Cut); break;
+        //            case 6: Program.SetMarker(Program.MarkerType.Mark); break;
+        //        }
+        //    }
+        //}
 
         internal void SetEpTime(TimeSpan eptime) {
             SetEpTimeSafe(eptime.ToString(Properties.Settings.Default.TimeCodeDisplayFormat));
