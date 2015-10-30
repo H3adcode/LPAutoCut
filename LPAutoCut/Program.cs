@@ -67,12 +67,12 @@ namespace LPAutoCut {
         }
 
         internal static void StopTimer() {
+            if (isEpisode) // if episode running stop episode
+                StopEpisode();
             // update form
             mainForm.OnStop();
             // stop timer
             clockUpdateTimer.Enabled = false;
-            if (isEpisode) // if episode running stop episode
-                StopEpisode();
             isStarted = false;
         }
 
