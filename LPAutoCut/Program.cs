@@ -44,9 +44,16 @@ namespace LPAutoCut {
             if (File.Exists(tmpMKRFile))
                 File.Delete(tmpMKRFile);
         }
-        
 
-        internal static void StartTimer() {
+
+        internal static void StartStopTimer() {
+            if (isStarted)
+                StopTimer();
+            else
+                StartTimer();
+        }
+
+        static void StartTimer() {
             // clear form
             markers.Clear();
             // init timer
@@ -59,7 +66,7 @@ namespace LPAutoCut {
             mainForm.OnStart();
         }
 
-        internal static void StopTimer() {
+        static void StopTimer() {
             // update form
             mainForm.OnStop();
             // stop timer
@@ -69,7 +76,15 @@ namespace LPAutoCut {
             isStarted = false;
         }
 
-        internal static void StartEpisode() {
+        internal static void StartStopEpisode() {
+            if (!isStarted) return; // if not started break
+            if (isEpisode)
+                StopEpisode();
+            else
+                StartEpisode();
+        }
+
+        static void StartEpisode() {
             if (!isStarted) return; // if not started break
             currentEpisodeStart = DateTime.Now;
             SetMarker(MarkerType.EpStart);
@@ -78,7 +93,7 @@ namespace LPAutoCut {
             mainForm.OnEpisodeStart();
         }
 
-        internal static void StopEpisode() {
+        static void StopEpisode() {
             if (!isStarted) return; // if not started break
             currentEpisodeEnd = DateTime.Now;
             SetMarker(MarkerType.EpEnd);
