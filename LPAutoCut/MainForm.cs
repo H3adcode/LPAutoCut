@@ -52,7 +52,7 @@ namespace LPAutoCut {
                     case (int)Keys.F3: Program.SetMarker(Program.MarkerType.Cut); break;
                     case (int)Keys.F4: Program.SetMarker(Program.MarkerType.Mark); break;
                 }
-                return (IntPtr)1;
+                return (IntPtr)0;
             } else
                 return CallNextHookEx(hhook, code, (int)wParam, lParam);
         }
