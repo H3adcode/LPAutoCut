@@ -44,7 +44,14 @@ namespace LPAutoCut {
             if (File.Exists(tmpMKRFile))
                 File.Delete(tmpMKRFile);
         }
-        
+
+
+        internal static void StartStopTimer() {
+            if (isStarted)
+                StopTimer();
+            else
+                StartTimer();
+        }
 
         internal static void StartTimer() {
             // clear form
@@ -60,13 +67,21 @@ namespace LPAutoCut {
         }
 
         internal static void StopTimer() {
+            if (isEpisode) // if episode running stop episode
+                StopEpisode();
             // update form
             mainForm.OnStop();
             // stop timer
             clockUpdateTimer.Enabled = false;
-            if (isEpisode) // if episode running stop episode
-                StopEpisode();
             isStarted = false;
+        }
+
+        internal static void StartStopEpisode() {
+            if (!isStarted) return; // if not started break
+            if (isEpisode)
+                StopEpisode();
+            else
+                StartEpisode();
         }
 
         internal static void StartEpisode() {
