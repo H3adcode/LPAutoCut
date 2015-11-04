@@ -91,5 +91,65 @@ namespace LPAutoCut.Properties {
                 return ((string)(this["TimeCodeDisplayFormat"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("120")]
+        public int TimerStartStopKey {
+            get {
+                return ((int)(this["TimerStartStopKey"]));
+            }
+            set {
+                this["TimerStartStopKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("118")]
+        public int EpisodeStartStopKey {
+            get {
+                return ((int)(this["EpisodeStartStopKey"]));
+            }
+            set {
+                this["EpisodeStartStopKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("114")]
+        public int CutMarkerKey {
+            get {
+                return ((int)(this["CutMarkerKey"]));
+            }
+            set {
+                this["CutMarkerKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("113")]
+        public int EditMarkerKey {
+            get {
+                return ((int)(this["EditMarkerKey"]));
+            }
+            set {
+                this["EditMarkerKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("115")]
+        public int MarkMarkerKey {
+            get {
+                return ((int)(this["MarkMarkerKey"]));
+            }
+            set {
+                this["MarkMarkerKey"] = value;
+            }
+        }
     }
 }

@@ -81,13 +81,11 @@ namespace LPAutoCut {
 
         public static IntPtr hookProc(int code, IntPtr wParam, IntPtr lParam) {
             if (code >= 0 && wParam == (IntPtr)WM_KEYDOWN) {
-                switch (Marshal.ReadInt32(lParam)) {
-                    case (int)Keys.F9: Program.StartStopTimer(); break;
-                    case (int)Keys.F7: Program.StartStopEpisode(); break;
-                    case (int)Keys.F2: Program.SetMarker(Program.MarkerType.Edit); break;
-                    case (int)Keys.F3: Program.SetMarker(Program.MarkerType.Cut); break;
-                    case (int)Keys.F4: Program.SetMarker(Program.MarkerType.Mark); break;
-                }
+                if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.TimerStartStopKey) Program.StartStopTimer();
+                else if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.EpisodeStartStopKey) Program.StartStopEpisode();
+                else if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.CutMarkerKey) Program.SetMarker(Program.MarkerType.Cut);
+                else if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.EditMarkerKey) Program.SetMarker(Program.MarkerType.Edit);
+                else if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.MarkMarkerKey) Program.SetMarker(Program.MarkerType.Mark);
                 return (IntPtr)0;
             } else
                 return CallNextHookEx(hhook, code, (int)wParam, lParam);

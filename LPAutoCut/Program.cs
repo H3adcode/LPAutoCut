@@ -54,6 +54,7 @@ namespace LPAutoCut {
         }
 
         internal static void StartTimer() {
+            if (isStarted) return;
             // clear form
             markers.Clear();
             // init timer
@@ -67,6 +68,7 @@ namespace LPAutoCut {
         }
 
         internal static void StopTimer() {
+            if (!isStarted) return;
             if (isEpisode) // if episode running stop episode
                 StopEpisode();
             // update form
@@ -85,6 +87,7 @@ namespace LPAutoCut {
         }
 
         internal static void StartEpisode() {
+            if (isEpisode) return;
             if (!isStarted) return; // if not started break
             currentEpisodeStart = DateTime.Now;
             SetMarker(MarkerType.EpStart);
@@ -94,6 +97,7 @@ namespace LPAutoCut {
         }
 
         internal static void StopEpisode() {
+            if (!isEpisode) return;
             if (!isStarted) return; // if not started break
             currentEpisodeEnd = DateTime.Now;
             SetMarker(MarkerType.EpEnd);
@@ -104,6 +108,7 @@ namespace LPAutoCut {
         }
 
         internal static void SetMarker(MarkerType type) {
+            if (!isStarted) return;
             Marker marker = new Marker();
             marker.timestamp = DateTime.Now.Subtract(start);
             marker.type = type;

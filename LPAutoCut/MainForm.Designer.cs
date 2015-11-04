@@ -53,10 +53,22 @@
             this.bt_save = new System.Windows.Forms.Button();
             this.bt_load = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
+            this.tcTabs = new System.Windows.Forms.TabControl();
+            this.tbTimer = new System.Windows.Forms.TabPage();
+            this.tpSettings = new System.Windows.Forms.TabPage();
+            this.lvHotkeys = new System.Windows.Forms.ListView();
+            this.chFunction = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chHotkey = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.btSaveHotkeys = new System.Windows.Forms.Button();
+            this.btUndoHotkeys = new System.Windows.Forms.Button();
+            this.btDefaultHotkeys = new System.Windows.Forms.Button();
             this.groupBox4.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.tcTabs.SuspendLayout();
+            this.tbTimer.SuspendLayout();
+            this.tpSettings.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox4
@@ -66,7 +78,7 @@
             this.groupBox4.Controls.Add(this.dtp_alert);
             this.groupBox4.Controls.Add(this.cb_alert);
             this.groupBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox4.Location = new System.Drawing.Point(325, 12);
+            this.groupBox4.Location = new System.Drawing.Point(318, 6);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(255, 77);
             this.groupBox4.TabIndex = 0;
@@ -119,7 +131,7 @@
             // 
             // bt_export
             // 
-            this.bt_export.Location = new System.Drawing.Point(494, 101);
+            this.bt_export.Location = new System.Drawing.Point(481, 95);
             this.bt_export.Name = "bt_export";
             this.bt_export.Size = new System.Drawing.Size(75, 38);
             this.bt_export.TabIndex = 1;
@@ -134,7 +146,7 @@
             this.groupBox1.Controls.Add(this.lv_marker);
             this.groupBox1.Controls.Add(this.bt_mark);
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(12, 155);
+            this.groupBox1.Location = new System.Drawing.Point(6, 149);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(307, 179);
             this.groupBox1.TabIndex = 16;
@@ -206,7 +218,7 @@
             // 
             this.groupBox2.Controls.Add(this.lv_eptimes);
             this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(325, 155);
+            this.groupBox2.Location = new System.Drawing.Point(319, 149);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(255, 179);
             this.groupBox2.TabIndex = 17;
@@ -255,7 +267,7 @@
             this.groupBox3.Controls.Add(this.bt_stop);
             this.groupBox3.Controls.Add(this.bt_start);
             this.groupBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox3.Location = new System.Drawing.Point(12, 12);
+            this.groupBox3.Location = new System.Drawing.Point(6, 6);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(307, 137);
             this.groupBox3.TabIndex = 18;
@@ -354,7 +366,7 @@
             // bt_save
             // 
             this.bt_save.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bt_save.Location = new System.Drawing.Point(332, 101);
+            this.bt_save.Location = new System.Drawing.Point(319, 95);
             this.bt_save.Name = "bt_save";
             this.bt_save.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.bt_save.Size = new System.Drawing.Size(75, 38);
@@ -365,7 +377,7 @@
             // 
             // bt_load
             // 
-            this.bt_load.Location = new System.Drawing.Point(413, 101);
+            this.bt_load.Location = new System.Drawing.Point(400, 95);
             this.bt_load.Name = "bt_load";
             this.bt_load.Size = new System.Drawing.Size(75, 38);
             this.bt_load.TabIndex = 19;
@@ -377,27 +389,111 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(448, 329);
+            this.label3.Location = new System.Drawing.Point(465, 365);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(132, 13);
             this.label3.TabIndex = 11;
             this.label3.Text = "©2015 Michael Middelhoff";
             // 
-            // Form1
+            // tcTabs
+            // 
+            this.tcTabs.Controls.Add(this.tbTimer);
+            this.tcTabs.Controls.Add(this.tpSettings);
+            this.tcTabs.Location = new System.Drawing.Point(12, 12);
+            this.tcTabs.Name = "tcTabs";
+            this.tcTabs.SelectedIndex = 0;
+            this.tcTabs.Size = new System.Drawing.Size(589, 353);
+            this.tcTabs.TabIndex = 20;
+            // 
+            // tbTimer
+            // 
+            this.tbTimer.Controls.Add(this.groupBox3);
+            this.tbTimer.Controls.Add(this.groupBox1);
+            this.tbTimer.Controls.Add(this.groupBox2);
+            this.tbTimer.Controls.Add(this.bt_load);
+            this.tbTimer.Controls.Add(this.groupBox4);
+            this.tbTimer.Controls.Add(this.bt_save);
+            this.tbTimer.Controls.Add(this.bt_export);
+            this.tbTimer.Location = new System.Drawing.Point(4, 22);
+            this.tbTimer.Name = "tbTimer";
+            this.tbTimer.Padding = new System.Windows.Forms.Padding(3);
+            this.tbTimer.Size = new System.Drawing.Size(581, 327);
+            this.tbTimer.TabIndex = 0;
+            this.tbTimer.Text = "Timer";
+            this.tbTimer.UseVisualStyleBackColor = true;
+            // 
+            // tpSettings
+            // 
+            this.tpSettings.Controls.Add(this.btDefaultHotkeys);
+            this.tpSettings.Controls.Add(this.btUndoHotkeys);
+            this.tpSettings.Controls.Add(this.btSaveHotkeys);
+            this.tpSettings.Controls.Add(this.lvHotkeys);
+            this.tpSettings.Location = new System.Drawing.Point(4, 22);
+            this.tpSettings.Name = "tpSettings";
+            this.tpSettings.Padding = new System.Windows.Forms.Padding(3);
+            this.tpSettings.Size = new System.Drawing.Size(581, 327);
+            this.tpSettings.TabIndex = 1;
+            this.tpSettings.Text = "Settings";
+            this.tpSettings.UseVisualStyleBackColor = true;
+            // 
+            // lvHotkeys
+            // 
+            this.lvHotkeys.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.chFunction,
+            this.chHotkey});
+            this.lvHotkeys.Location = new System.Drawing.Point(6, 6);
+            this.lvHotkeys.Name = "lvHotkeys";
+            this.lvHotkeys.Size = new System.Drawing.Size(310, 172);
+            this.lvHotkeys.TabIndex = 0;
+            this.lvHotkeys.UseCompatibleStateImageBehavior = false;
+            this.lvHotkeys.View = System.Windows.Forms.View.Details;
+            // 
+            // chFunction
+            // 
+            this.chFunction.Text = "Funktion";
+            this.chFunction.Width = 114;
+            // 
+            // chHotkey
+            // 
+            this.chHotkey.Text = "Hotkey";
+            this.chHotkey.Width = 192;
+            // 
+            // btSaveHotkeys
+            // 
+            this.btSaveHotkeys.Location = new System.Drawing.Point(322, 6);
+            this.btSaveHotkeys.Name = "btSaveHotkeys";
+            this.btSaveHotkeys.Size = new System.Drawing.Size(75, 23);
+            this.btSaveHotkeys.TabIndex = 1;
+            this.btSaveHotkeys.Text = "Save";
+            this.btSaveHotkeys.UseVisualStyleBackColor = true;
+            // 
+            // btUndoHotkeys
+            // 
+            this.btUndoHotkeys.Location = new System.Drawing.Point(322, 35);
+            this.btUndoHotkeys.Name = "btUndoHotkeys";
+            this.btUndoHotkeys.Size = new System.Drawing.Size(75, 23);
+            this.btUndoHotkeys.TabIndex = 2;
+            this.btUndoHotkeys.Text = "Revert";
+            this.btUndoHotkeys.UseVisualStyleBackColor = true;
+            // 
+            // btDefaultHotkeys
+            // 
+            this.btDefaultHotkeys.Location = new System.Drawing.Point(322, 64);
+            this.btDefaultHotkeys.Name = "btDefaultHotkeys";
+            this.btDefaultHotkeys.Size = new System.Drawing.Size(75, 23);
+            this.btDefaultHotkeys.TabIndex = 3;
+            this.btDefaultHotkeys.Text = "Default";
+            this.btDefaultHotkeys.UseVisualStyleBackColor = true;
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(586, 343);
+            this.ClientSize = new System.Drawing.Size(607, 385);
+            this.Controls.Add(this.tcTabs);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.bt_load);
-            this.Controls.Add(this.bt_save);
-            this.Controls.Add(this.bt_export);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox4);
-            this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "LPAutoCut";
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
@@ -405,6 +501,9 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.tcTabs.ResumeLayout(false);
+            this.tbTimer.ResumeLayout(false);
+            this.tpSettings.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -442,6 +541,15 @@
         private System.Windows.Forms.Button bt_restoreDefault;
         private System.Windows.Forms.Button bt_setDefault;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TabControl tcTabs;
+        private System.Windows.Forms.TabPage tbTimer;
+        private System.Windows.Forms.TabPage tpSettings;
+        private System.Windows.Forms.Button btDefaultHotkeys;
+        private System.Windows.Forms.Button btUndoHotkeys;
+        private System.Windows.Forms.Button btSaveHotkeys;
+        private System.Windows.Forms.ListView lvHotkeys;
+        private System.Windows.Forms.ColumnHeader chFunction;
+        private System.Windows.Forms.ColumnHeader chHotkey;
 
     }
 }
