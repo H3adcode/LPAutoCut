@@ -14,15 +14,17 @@ namespace LPAutoCut {
     static class Program {
         static System.Timers.Timer clockUpdateTimer;
         static List<Marker> markers = new List<Marker>();
-        static DateTime start, currentEpisodeStart, currentEpisodeEnd;
+        static DateTime start, currentEpisodeStart, currentPauseStart;
+        static TimeSpan episodePauseDuration = new TimeSpan(0);
         static MainForm mainForm;
         static bool isEpisode = false;
         static bool isStarted = false;
+        static bool isPaused = false;
         static string tmpJSXFile = Path.GetTempPath() + "\\" + Properties.Settings.Default.JSXTempFileName;
         static string tmpMKRFile = Path.GetTempPath() + "\\" + Properties.Settings.Default.MKRTempFileName;
         static string executionPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
         
-        public enum MarkerType { EpStart, EpEnd, Edit, Cut, Mark };
+        public enum MarkerType { EpStart, EpEnd, Edit, Cut, PaStart, PaEnd };
 
         [STAThread]
         static void Main() {
@@ -96,15 +98,36 @@ namespace LPAutoCut {
             mainForm.OnEpisodeStart();
         }
 
+        internal static void ToggleEpisodePause() {
+            if (isPaused)
+                UnpauseEpisode();
+            else
+                PauseEpisode();
+        }
+
+        static void PauseEpisode() {
+            if (isPaused || !isEpisode) return;
+            isPaused = true;
+            currentPauseStart = DateTime.Now;
+            SetMarker(MarkerType.PaStart);
+        }
+
+        internal static void UnpauseEpisode() {
+            if (!isPaused || !isEpisode) return;
+            isPaused = false;
+            episodePauseDuration = episodePauseDuration.Add(DateTime.Now.Subtract(currentPauseStart));
+            SetMarker(MarkerType.PaEnd);
+        }
+
         internal static void StopEpisode() {
             if (!isEpisode) return;
             if (!isStarted) return; // if not started break
-            currentEpisodeEnd = DateTime.Now;
             SetMarker(MarkerType.EpEnd);
             isEpisode = false;
             // update form
-            mainForm.AddEpisodeTime(currentEpisodeStart.Subtract(start), currentEpisodeEnd.Subtract(start));
+            mainForm.AddEpisodeTime(DateTime.Now.Subtract(currentEpisodeStart).Subtract(episodePauseDuration));
             mainForm.OnEpisodeStop();
+            episodePauseDuration = new TimeSpan(0);
         }
 
         internal static void SetMarker(MarkerType type) {
@@ -122,8 +145,11 @@ namespace LPAutoCut {
             UpdateTotalTime(updateTime); // total time
             UpdateEpisodeTime(updateTime); // episode time
             // if alert is set and alert time elapased update form
-            if (isEpisode && Properties.Settings.Default.AlertChecked 
-                && TimeSpan.Compare(updateTime.Subtract(currentEpisodeStart), Properties.Settings.Default.AlertTime) > 0)
+            if (isEpisode 
+                && Properties.Settings.Default.AlertChecked
+                && TimeSpan.Compare(updateTime.Subtract(currentEpisodeStart).Subtract(episodePauseDuration), Properties.Settings.Default.AlertTime) > 0)
+                mainForm.OnTimeAlertOn();
+            else if(isPaused)
                 mainForm.OnTimeAlertOn();
             else
                 mainForm.OnTimeAlertOff();
@@ -134,10 +160,14 @@ namespace LPAutoCut {
         }
 
         static void UpdateEpisodeTime(DateTime updateTime) {
-            if(isEpisode)
-                mainForm.SetEpTime(updateTime.Subtract(currentEpisodeStart));
-            else
-                mainForm.ResetEpTime();
+            if (isPaused)
+                mainForm.SetEpTime(currentPauseStart.Subtract(currentEpisodeStart).Subtract(episodePauseDuration));
+            else {
+                if (isEpisode)
+                    mainForm.SetEpTime(updateTime.Subtract(currentEpisodeStart).Subtract(episodePauseDuration));
+                else
+                    mainForm.ResetEpTime();
+            }
         }
 
         // resets settings to application defaults
@@ -207,7 +237,8 @@ namespace LPAutoCut {
                 markers.Clear(); // clear marker list
                 mainForm.resetForm(); // clear form
                 TimeSpan tempEpisodeStart = new TimeSpan();
-                TimeSpan tempEpisodeEnd;
+                TimeSpan tempPauseStart = new TimeSpan();
+                TimeSpan tempPauseDuration = new TimeSpan(0);
                 for (int i = 0; i < markersRaw.Length; i++) { // create a marker form each raw file line
                     string[] markerDataRaw = markersRaw[i].Split(' '); // split time and info
                     string[] markerTimeRaw = markerDataRaw[0].Split(new char[]{':','.'}); // split time codes
@@ -230,9 +261,16 @@ namespace LPAutoCut {
                     // update episode times in form
                     if (type.Equals(MarkerType.EpStart))
                         tempEpisodeStart = marker.timestamp;
-                    else if (type.Equals(MarkerType.EpEnd)) {
-                        tempEpisodeEnd = marker.timestamp;
-                        if(tempEpisodeStart != null) mainForm.AddEpisodeTime(tempEpisodeStart, tempEpisodeEnd);
+                    else if (type.Equals(MarkerType.PaStart))
+                        tempPauseStart = marker.timestamp;
+                    else if (type.Equals(MarkerType.PaEnd)) {
+                        if (tempPauseStart != null)
+                            tempPauseDuration = tempPauseDuration.Add(marker.timestamp.Subtract(tempPauseStart));
+                    } else if (type.Equals(MarkerType.EpEnd)) {
+                        if (tempEpisodeStart != null) {
+                            mainForm.AddEpisodeTime(marker.timestamp.Subtract(tempEpisodeStart).Subtract(tempPauseDuration));
+                            tempPauseDuration = new TimeSpan(0);
+                        }
                     }
                 }
             }

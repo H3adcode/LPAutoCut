@@ -35,8 +35,8 @@
     <Setting Name="EditMarkerKey" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">113</Value>
     </Setting>
-    <Setting Name="MarkMarkerKey" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">115</Value>
+    <Setting Name="TogglePauseKey" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">119</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -37,7 +37,8 @@ namespace LPAutoCut {
         List<Button> buttonGroupDisabledInEpisode = new List<Button>(); // disabled if episode is started, else enabled
 
         bool flashEffectActive = false;
-        string EPPAUSED = "paused";
+        bool pauseEffectActive = false;
+        string EPSTOPPED = "";
                 
         System.Timers.Timer flashEffectTimer; // timer for alert flash effect
 
@@ -50,7 +51,7 @@ namespace LPAutoCut {
             buttonGroupEnabledOnStart.Add(bt_epstart);
             buttonGroupEnabledOnStart.Add(bt_edit);
             buttonGroupEnabledOnStart.Add(bt_cut);
-            buttonGroupEnabledOnStart.Add(bt_mark);
+            buttonGroupEnabledOnStart.Add(bt_pause);
             buttonGroupEnabledOnStart.Add(bt_stop);
 
             buttonGroupDisabledOnStart.Add(bt_start);
@@ -85,7 +86,7 @@ namespace LPAutoCut {
                 else if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.EpisodeStartStopKey) Program.StartStopEpisode();
                 else if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.CutMarkerKey) Program.SetMarker(Program.MarkerType.Cut);
                 else if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.EditMarkerKey) Program.SetMarker(Program.MarkerType.Edit);
-                else if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.MarkMarkerKey) Program.SetMarker(Program.MarkerType.Mark);
+                else if (Marshal.ReadInt32(lParam) == Properties.Settings.Default.TogglePauseKey) Program.ToggleEpisodePause();
                 return (IntPtr)0;
             } else
                 return CallNextHookEx(hhook, code, (int)wParam, lParam);
@@ -96,7 +97,7 @@ namespace LPAutoCut {
         }
 
         internal void ResetEpTime() {
-            SetEpTimeSafe(EPPAUSED);
+            SetEpTimeSafe(EPSTOPPED);
         }
 
         void SetEpTimeSafe(string text) {
@@ -108,12 +109,14 @@ namespace LPAutoCut {
                 tb_episodetime.Text = text;
         }
 
-        internal void AddEpisodeTime(TimeSpan start, TimeSpan stop) {
-            lv_eptimes.Items.Add(new ListViewItem(new string[] { start.ToString(Properties.Settings.Default.TimeCodeDisplayFormat), stop.ToString(Properties.Settings.Default.TimeCodeDisplayFormat), start.Subtract(stop).ToString(Properties.Settings.Default.TimeCodeDisplayFormat) }));
+        internal void AddEpisodeTime(TimeSpan duration) {
+            lv_eptimes.Items.Add(new ListViewItem(new string[] { "" + (lv_eptimes.Items.Count + 1), duration.ToString(Properties.Settings.Default.TimeCodeDisplayFormat) }));
+            lv_eptimes.Items[lv_eptimes.Items.Count - 1].EnsureVisible();
         }
 
         internal void AddMarkerInfo(TimeSpan timestamp, string info) {
             lv_marker.Items.Add(new ListViewItem(new String[] { timestamp.ToString(Properties.Settings.Default.TimeCodeDisplayFormat), info }));
+            lv_marker.Items[lv_marker.Items.Count - 1].EnsureVisible();
         }
 
         internal void SetTotalTime(TimeSpan totaltime) {
@@ -186,7 +189,7 @@ namespace LPAutoCut {
             } else
                 tb_episodetime.BackColor = Color.White;
         }
-
+        
         void OnFlashEffectTimerElapsed(object sender, ElapsedEventArgs e) {
             if (flashEffectActive) {
                 if (tb_episodetime.InvokeRequired) {
@@ -236,11 +239,7 @@ namespace LPAutoCut {
         private void btn_cut_Click(object sender, EventArgs e) {
             Program.SetMarker(Program.MarkerType.Cut);
         }
-
-        private void btn_mark_Click(object sender, EventArgs e) {
-            Program.SetMarker(Program.MarkerType.Mark);
-        }
-
+        
         private void cb_alert_CheckedChanged(object sender, EventArgs e) {
             Program.SetAlert(cb_alert.Checked);
             dtp_alert.Enabled = cb_alert.Checked;
@@ -268,6 +267,10 @@ namespace LPAutoCut {
 
         private void bt_export_Click(object sender, EventArgs e) {
             Program.ExportMarker();
+        }
+
+        private void bt_pause_Click(object sender, EventArgs e) {
+            Program.ToggleEpisodePause();
         }
     }
 }

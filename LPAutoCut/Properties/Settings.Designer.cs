@@ -142,13 +142,13 @@ namespace LPAutoCut.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("115")]
-        public int MarkMarkerKey {
+        [global::System.Configuration.DefaultSettingValueAttribute("119")]
+        public int TogglePauseKey {
             get {
-                return ((int)(this["MarkMarkerKey"]));
+                return ((int)(this["TogglePauseKey"]));
             }
             set {
-                this["MarkMarkerKey"] = value;
+                this["TogglePauseKey"] = value;
             }
         }
     }

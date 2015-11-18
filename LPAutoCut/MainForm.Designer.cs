@@ -35,11 +35,10 @@
             this.lv_marker = new System.Windows.Forms.ListView();
             this.ch_timestamp = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ch_description = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.bt_mark = new System.Windows.Forms.Button();
+            this.bt_pause = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.lv_eptimes = new System.Windows.Forms.ListView();
-            this.ch_start = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.ch_end = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ch_idx = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ch_duration = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -56,12 +55,12 @@
             this.tcTabs = new System.Windows.Forms.TabControl();
             this.tbTimer = new System.Windows.Forms.TabPage();
             this.tpSettings = new System.Windows.Forms.TabPage();
+            this.btDefaultHotkeys = new System.Windows.Forms.Button();
+            this.btUndoHotkeys = new System.Windows.Forms.Button();
+            this.btSaveHotkeys = new System.Windows.Forms.Button();
             this.lvHotkeys = new System.Windows.Forms.ListView();
             this.chFunction = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chHotkey = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.btSaveHotkeys = new System.Windows.Forms.Button();
-            this.btUndoHotkeys = new System.Windows.Forms.Button();
-            this.btDefaultHotkeys = new System.Windows.Forms.Button();
             this.groupBox4.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -144,7 +143,7 @@
             this.groupBox1.Controls.Add(this.bt_edit);
             this.groupBox1.Controls.Add(this.bt_cut);
             this.groupBox1.Controls.Add(this.lv_marker);
-            this.groupBox1.Controls.Add(this.bt_mark);
+            this.groupBox1.Controls.Add(this.bt_pause);
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox1.Location = new System.Drawing.Point(6, 149);
             this.groupBox1.Name = "groupBox1";
@@ -183,9 +182,10 @@
             this.lv_marker.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.ch_timestamp,
             this.ch_description});
-            this.lv_marker.Enabled = false;
             this.lv_marker.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lv_marker.FullRowSelect = true;
             this.lv_marker.Location = new System.Drawing.Point(6, 63);
+            this.lv_marker.MultiSelect = false;
             this.lv_marker.Name = "lv_marker";
             this.lv_marker.Size = new System.Drawing.Size(291, 108);
             this.lv_marker.TabIndex = 12;
@@ -202,17 +202,17 @@
             this.ch_description.Text = "Description";
             this.ch_description.Width = 166;
             // 
-            // bt_mark
+            // bt_pause
             // 
-            this.bt_mark.Enabled = false;
-            this.bt_mark.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bt_mark.Location = new System.Drawing.Point(168, 19);
-            this.bt_mark.Name = "bt_mark";
-            this.bt_mark.Size = new System.Drawing.Size(75, 38);
-            this.bt_mark.TabIndex = 14;
-            this.bt_mark.Text = "Mark";
-            this.bt_mark.UseVisualStyleBackColor = true;
-            this.bt_mark.Click += new System.EventHandler(this.btn_mark_Click);
+            this.bt_pause.Enabled = false;
+            this.bt_pause.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.bt_pause.Location = new System.Drawing.Point(222, 19);
+            this.bt_pause.Name = "bt_pause";
+            this.bt_pause.Size = new System.Drawing.Size(75, 38);
+            this.bt_pause.TabIndex = 14;
+            this.bt_pause.Text = "Pause";
+            this.bt_pause.UseVisualStyleBackColor = true;
+            this.bt_pause.Click += new System.EventHandler(this.bt_pause_Click);
             // 
             // groupBox2
             // 
@@ -228,28 +228,22 @@
             // lv_eptimes
             // 
             this.lv_eptimes.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.ch_start,
-            this.ch_end,
+            this.ch_idx,
             this.ch_duration});
-            this.lv_eptimes.Enabled = false;
             this.lv_eptimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lv_eptimes.FullRowSelect = true;
             this.lv_eptimes.Location = new System.Drawing.Point(0, 16);
+            this.lv_eptimes.MultiSelect = false;
             this.lv_eptimes.Name = "lv_eptimes";
             this.lv_eptimes.Size = new System.Drawing.Size(247, 155);
             this.lv_eptimes.TabIndex = 10;
             this.lv_eptimes.UseCompatibleStateImageBehavior = false;
             this.lv_eptimes.View = System.Windows.Forms.View.Details;
             // 
-            // ch_start
+            // ch_idx
             // 
-            this.ch_start.Text = "Start";
-            this.ch_start.Width = 80;
-            // 
-            // ch_end
-            // 
-            this.ch_end.Text = "End";
-            this.ch_end.Width = 80;
+            this.ch_idx.Text = "Nr";
+            this.ch_idx.Width = 74;
             // 
             // ch_duration
             // 
@@ -436,6 +430,33 @@
             this.tpSettings.Text = "Settings";
             this.tpSettings.UseVisualStyleBackColor = true;
             // 
+            // btDefaultHotkeys
+            // 
+            this.btDefaultHotkeys.Location = new System.Drawing.Point(322, 64);
+            this.btDefaultHotkeys.Name = "btDefaultHotkeys";
+            this.btDefaultHotkeys.Size = new System.Drawing.Size(75, 23);
+            this.btDefaultHotkeys.TabIndex = 3;
+            this.btDefaultHotkeys.Text = "Default";
+            this.btDefaultHotkeys.UseVisualStyleBackColor = true;
+            // 
+            // btUndoHotkeys
+            // 
+            this.btUndoHotkeys.Location = new System.Drawing.Point(322, 35);
+            this.btUndoHotkeys.Name = "btUndoHotkeys";
+            this.btUndoHotkeys.Size = new System.Drawing.Size(75, 23);
+            this.btUndoHotkeys.TabIndex = 2;
+            this.btUndoHotkeys.Text = "Revert";
+            this.btUndoHotkeys.UseVisualStyleBackColor = true;
+            // 
+            // btSaveHotkeys
+            // 
+            this.btSaveHotkeys.Location = new System.Drawing.Point(322, 6);
+            this.btSaveHotkeys.Name = "btSaveHotkeys";
+            this.btSaveHotkeys.Size = new System.Drawing.Size(75, 23);
+            this.btSaveHotkeys.TabIndex = 1;
+            this.btSaveHotkeys.Text = "Save";
+            this.btSaveHotkeys.UseVisualStyleBackColor = true;
+            // 
             // lvHotkeys
             // 
             this.lvHotkeys.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -457,33 +478,6 @@
             // 
             this.chHotkey.Text = "Hotkey";
             this.chHotkey.Width = 192;
-            // 
-            // btSaveHotkeys
-            // 
-            this.btSaveHotkeys.Location = new System.Drawing.Point(322, 6);
-            this.btSaveHotkeys.Name = "btSaveHotkeys";
-            this.btSaveHotkeys.Size = new System.Drawing.Size(75, 23);
-            this.btSaveHotkeys.TabIndex = 1;
-            this.btSaveHotkeys.Text = "Save";
-            this.btSaveHotkeys.UseVisualStyleBackColor = true;
-            // 
-            // btUndoHotkeys
-            // 
-            this.btUndoHotkeys.Location = new System.Drawing.Point(322, 35);
-            this.btUndoHotkeys.Name = "btUndoHotkeys";
-            this.btUndoHotkeys.Size = new System.Drawing.Size(75, 23);
-            this.btUndoHotkeys.TabIndex = 2;
-            this.btUndoHotkeys.Text = "Revert";
-            this.btUndoHotkeys.UseVisualStyleBackColor = true;
-            // 
-            // btDefaultHotkeys
-            // 
-            this.btDefaultHotkeys.Location = new System.Drawing.Point(322, 64);
-            this.btDefaultHotkeys.Name = "btDefaultHotkeys";
-            this.btDefaultHotkeys.Size = new System.Drawing.Size(75, 23);
-            this.btDefaultHotkeys.TabIndex = 3;
-            this.btDefaultHotkeys.Text = "Default";
-            this.btDefaultHotkeys.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -521,11 +515,10 @@
         private System.Windows.Forms.ListView lv_marker;
         private System.Windows.Forms.ColumnHeader ch_timestamp;
         private System.Windows.Forms.ColumnHeader ch_description;
-        private System.Windows.Forms.Button bt_mark;
+        private System.Windows.Forms.Button bt_pause;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.ListView lv_eptimes;
-        private System.Windows.Forms.ColumnHeader ch_start;
-        private System.Windows.Forms.ColumnHeader ch_end;
+        private System.Windows.Forms.ColumnHeader ch_idx;
         private System.Windows.Forms.ColumnHeader ch_duration;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Label label1;
