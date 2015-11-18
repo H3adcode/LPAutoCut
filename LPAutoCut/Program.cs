@@ -120,8 +120,9 @@ namespace LPAutoCut {
         }
 
         internal static void StopEpisode() {
-            if (!isEpisode) return;
-            if (!isStarted) return; // if not started break
+            if (!isEpisode || !isStarted) return; // if not started break
+            if (isPaused)
+                UnpauseEpisode();
             SetMarker(MarkerType.EpEnd);
             isEpisode = false;
             // update form
